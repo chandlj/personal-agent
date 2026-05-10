@@ -97,6 +97,12 @@ workspace-local resources; gateway and scheduler should normally rely on global
 resources plus their resolved workspace state. Frontends should not import Pi
 directly.
 
+The M1 public options are intentionally limited to `sessionKey`,
+`workspaceRoot`, `includeWorkspaceResources`, resource path overrides, and prompt
+metadata. Model/provider, thinking-level, auth, tool allowlists, memory,
+persistence, approvals, and delivery metadata are deferred until the milestones
+that own those concerns.
+
 M1 uses in-memory Pi sessions. Durable sessions, transcripts, approvals, jobs,
 and memory remain control-plane work for later milestones.
 
