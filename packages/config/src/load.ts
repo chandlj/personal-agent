@@ -3,10 +3,27 @@ import { join } from "node:path";
 import type { AppConfig } from "./schema.js";
 
 export function loadAppConfig(): AppConfig {
+  const personalAgentRoot = join(homedir(), ".personal-agent");
+
   return {
     runtime: {
       mode: "local",
-      workspaceRoot: join(homedir(), ".personal-agent", "workspaces")
+      workspaceRoot: join(personalAgentRoot, "workspaces"),
+      resources: {
+        globalRoot: personalAgentRoot,
+        workspaceConfigDirName: ".personal-agent",
+        allowWorkspaceOverrides: true,
+        files: {
+          agents: "AGENTS.md",
+          system: "SYSTEM.md",
+          appendSystem: "APPEND_SYSTEM.md"
+        },
+        directories: {
+          skills: "skills",
+          prompts: "prompts",
+          extensions: "extensions"
+        }
+      }
     },
     auth: {
       uiMode: "token",

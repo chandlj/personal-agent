@@ -1,6 +1,27 @@
 export interface RuntimeConfig {
   mode: "local";
   workspaceRoot: string;
+  resources: RuntimeResourceConfig;
+}
+
+export interface RuntimeResourceConfig {
+  globalRoot: string;
+  workspaceConfigDirName: string;
+  allowWorkspaceOverrides: boolean;
+  files: RuntimeResourceFilesConfig;
+  directories: RuntimeResourceDirectoriesConfig;
+}
+
+export interface RuntimeResourceFilesConfig {
+  agents: string;
+  system: string;
+  appendSystem: string;
+}
+
+export interface RuntimeResourceDirectoriesConfig {
+  skills: string;
+  prompts: string;
+  extensions: string;
 }
 
 export interface AuthConfig {
