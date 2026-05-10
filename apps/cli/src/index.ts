@@ -9,7 +9,7 @@ async function main(): Promise<void> {
   console.log(formatBanner("personal-agent cli"));
   console.log(`mode: ${config.runtime.mode}`);
   console.log(`workspace: ${config.runtime.workspaceRoot}`);
-  console.log(`runtime scaffold ready: ${runtime.kind}`);
+  console.log(`runtime scaffold ready: ${runtime.config.runtime.mode}`);
 }
 
 main().catch((error: unknown) => {
