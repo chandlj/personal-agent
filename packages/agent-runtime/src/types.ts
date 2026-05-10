@@ -1,5 +1,6 @@
 import type {
   AppConfig,
+  ResolvedRuntimeResources,
   RuntimeResourcePaths,
   RuntimeResourceRootKind
 } from "@personal-agent/config";
@@ -199,6 +200,18 @@ export interface AgentRuntime {
 
 export interface RuntimeResourceLoader {
   load(): Promise<LoadedRuntimeResources>;
+}
+
+export interface RuntimeSessionFactoryCreateSessionInput {
+  config: AppConfig;
+  sessionKey: string;
+  workspaceRoot: string;
+  resources: ResolvedRuntimeResources;
+  resourceLoader: RuntimeResourceLoader;
+}
+
+export interface RuntimeSessionFactory {
+  createSession(input: RuntimeSessionFactoryCreateSessionInput): Promise<RuntimeSession>;
 }
 
 export interface CreateAgentRuntimeInput {

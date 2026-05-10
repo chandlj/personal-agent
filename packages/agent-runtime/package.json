@@ -10,6 +10,7 @@
     "build": "bun run check"
   },
   "dependencies": {
+    "@earendil-works/pi-coding-agent": "0.74.0",
     "@personal-agent/config": "workspace:*",
     "@personal-agent/session-store": "workspace:*",
     "@personal-agent/tool-router": "workspace:*"
