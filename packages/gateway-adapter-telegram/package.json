@@ -1,0 +1,22 @@
+{
+  "name": "@personal-agent/gateway-adapter-telegram",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "check": "bunx tsc -p tsconfig.json --pretty",
+    "build": "bun run check"
+  },
+  "dependencies": {
+    "@personal-agent/config": "workspace:*",
+    "@personal-agent/gateway-core": "workspace:*"
+  },
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  }
+}

@@ -1,0 +1,169 @@
+{
+  "lockfileVersion": 1,
+  "configVersion": 1,
+  "workspaces": {
+    "": {
+      "name": "personal-agent",
+      "devDependencies": {
+        "@biomejs/biome": "2.4.15",
+        "@types/bun": "1.3.13",
+        "typescript": "^5.9.0",
+      },
+    },
+    "apps/cli": {
+      "name": "@personal-agent/cli",
+      "version": "0.1.0",
+      "dependencies": {
+        "@personal-agent/agent-runtime": "workspace:*",
+        "@personal-agent/config": "workspace:*",
+        "@personal-agent/shared": "workspace:*",
+      },
+    },
+    "apps/gateway": {
+      "name": "@personal-agent/gateway-app",
+      "version": "0.1.0",
+      "dependencies": {
+        "@personal-agent/auth": "workspace:*",
+        "@personal-agent/config": "workspace:*",
+        "@personal-agent/gateway-adapter-telegram": "workspace:*",
+        "@personal-agent/gateway-core": "workspace:*",
+        "@personal-agent/shared": "workspace:*",
+      },
+    },
+    "apps/scheduler": {
+      "name": "@personal-agent/scheduler-app",
+      "version": "0.1.0",
+      "dependencies": {
+        "@personal-agent/config": "workspace:*",
+        "@personal-agent/scheduler-core": "workspace:*",
+        "@personal-agent/shared": "workspace:*",
+      },
+    },
+    "packages/agent-runtime": {
+      "name": "@personal-agent/agent-runtime",
+      "version": "0.1.0",
+      "dependencies": {
+        "@personal-agent/config": "workspace:*",
+        "@personal-agent/session-store": "workspace:*",
+        "@personal-agent/tool-router": "workspace:*",
+      },
+    },
+    "packages/auth": {
+      "name": "@personal-agent/auth",
+      "version": "0.1.0",
+      "dependencies": {
+        "@personal-agent/config": "workspace:*",
+      },
+    },
+    "packages/config": {
+      "name": "@personal-agent/config",
+      "version": "0.1.0",
+      "dependencies": {
+        "@personal-agent/shared": "workspace:*",
+      },
+    },
+    "packages/gateway-adapter-telegram": {
+      "name": "@personal-agent/gateway-adapter-telegram",
+      "version": "0.1.0",
+      "dependencies": {
+        "@personal-agent/config": "workspace:*",
+        "@personal-agent/gateway-core": "workspace:*",
+      },
+    },
+    "packages/gateway-core": {
+      "name": "@personal-agent/gateway-core",
+      "version": "0.1.0",
+      "dependencies": {
+        "@personal-agent/auth": "workspace:*",
+        "@personal-agent/config": "workspace:*",
+      },
+    },
+    "packages/sandbox": {
+      "name": "@personal-agent/sandbox",
+      "version": "0.1.0",
+      "dependencies": {
+        "@personal-agent/config": "workspace:*",
+      },
+    },
+    "packages/scheduler-core": {
+      "name": "@personal-agent/scheduler-core",
+      "version": "0.1.0",
+      "dependencies": {
+        "@personal-agent/config": "workspace:*",
+      },
+    },
+    "packages/session-store": {
+      "name": "@personal-agent/session-store",
+      "version": "0.1.0",
+      "dependencies": {
+        "@personal-agent/shared": "workspace:*",
+      },
+    },
+    "packages/shared": {
+      "name": "@personal-agent/shared",
+      "version": "0.1.0",
+    },
+    "packages/tool-router": {
+      "name": "@personal-agent/tool-router",
+      "version": "0.1.0",
+      "dependencies": {
+        "@personal-agent/sandbox": "workspace:*",
+      },
+    },
+  },
+  "packages": {
+    "@biomejs/biome": ["@biomejs/biome@2.4.15", "", { "optionalDependencies": { "@biomejs/cli-darwin-arm64": "2.4.15", "@biomejs/cli-darwin-x64": "2.4.15", "@biomejs/cli-linux-arm64": "2.4.15", "@biomejs/cli-linux-arm64-musl": "2.4.15", "@biomejs/cli-linux-x64": "2.4.15", "@biomejs/cli-linux-x64-musl": "2.4.15", "@biomejs/cli-win32-arm64": "2.4.15", "@biomejs/cli-win32-x64": "2.4.15" }, "bin": { "biome": "bin/biome" } }, "sha512-j5VH3a/h/HXTKBM50MDMxRCzkeLv9S2XJcW2WgnZT1+xyisi+0bISrXR82gCX+8S9lvK0skEvHJRN+3Ktr2hlw=="],
+
+    "@biomejs/cli-darwin-arm64": ["@biomejs/cli-darwin-arm64@2.4.15", "", { "os": "darwin", "cpu": "arm64" }, "sha512-rF3PPqLq1yoST79zaQbDjVJwsuIeci/O+9bgNmC5QpgOqz6aqYuzA4abyAGx+mgyiDXn4A049xAN8gijbuR1Qg=="],
+
+    "@biomejs/cli-darwin-x64": ["@biomejs/cli-darwin-x64@2.4.15", "", { "os": "darwin", "cpu": "x64" }, "sha512-/5KHXYMfSJs1fNXiX30xFtI8JcCFV6zaVVLxOa0M2sfqBKHkpQhRTv94yxQWxeTY2lzo2OuTlNvPC+hDQt2wcQ=="],
+
+    "@biomejs/cli-linux-arm64": ["@biomejs/cli-linux-arm64@2.4.15", "", { "os": "linux", "cpu": "arm64" }, "sha512-owaAMZD/T4LrD0ELNCk0Km3qrRHuM0X6EAyVE1FSqGY0rbLoiDLrO4Us2tllm6cAeB2Ioa9C2C08NZPdr8+0Ug=="],
+
+    "@biomejs/cli-linux-arm64-musl": ["@biomejs/cli-linux-arm64-musl@2.4.15", "", { "os": "linux", "cpu": "arm64" }, "sha512-ZPcxznxm0pogHBLZhYntyR3sR+MrZjqJIKEr7ZqVen0Rl+P/4upVmfYXjftizi9RoqZntg33fv/1fbdhbYXpEQ=="],
+
+    "@biomejs/cli-linux-x64": ["@biomejs/cli-linux-x64@2.4.15", "", { "os": "linux", "cpu": "x64" }, "sha512-0jj7THz12GbUOLmMibktK6DZjqz2zV64KFxyBtcFTKPiiOIY0a7vns1elpO1dERvxpsZ5ik0oFfz0oGwFde1+g=="],
+
+    "@biomejs/cli-linux-x64-musl": ["@biomejs/cli-linux-x64-musl@2.4.15", "", { "os": "linux", "cpu": "x64" }, "sha512-CNq/9W38SYSH023lfcQ4KKU8K0YX8T//FZUhcgtMMRABDojx5XsMV7jlweAvGSl389wJQB29Qo6Zb/a+jdvt+w=="],
+
+    "@biomejs/cli-win32-arm64": ["@biomejs/cli-win32-arm64@2.4.15", "", { "os": "win32", "cpu": "arm64" }, "sha512-ouhkYdlhp/1GghEJPdWwD/Vi3gQ1nFxuSpMolWsbq3Lsq3QUR4jl6UdhhscdCugKU5vOEuMiJhvKj66O0OCq+w=="],
+
+    "@biomejs/cli-win32-x64": ["@biomejs/cli-win32-x64@2.4.15", "", { "os": "win32", "cpu": "x64" }, "sha512-zBrGq5mx5wwpnow4+2BxUvleDM+GNd4sLbPaMapsSLQLD0NGRCquqPBTgN+7XkUteHvj7M+BstuI8tmnV7+HgQ=="],
+
+    "@personal-agent/agent-runtime": ["@personal-agent/agent-runtime@workspace:packages/agent-runtime"],
+
+    "@personal-agent/auth": ["@personal-agent/auth@workspace:packages/auth"],
+
+    "@personal-agent/cli": ["@personal-agent/cli@workspace:apps/cli"],
+
+    "@personal-agent/config": ["@personal-agent/config@workspace:packages/config"],
+
+    "@personal-agent/gateway-adapter-telegram": ["@personal-agent/gateway-adapter-telegram@workspace:packages/gateway-adapter-telegram"],
+
+    "@personal-agent/gateway-app": ["@personal-agent/gateway-app@workspace:apps/gateway"],
+
+    "@personal-agent/gateway-core": ["@personal-agent/gateway-core@workspace:packages/gateway-core"],
+
+    "@personal-agent/sandbox": ["@personal-agent/sandbox@workspace:packages/sandbox"],
+
+    "@personal-agent/scheduler-app": ["@personal-agent/scheduler-app@workspace:apps/scheduler"],
+
+    "@personal-agent/scheduler-core": ["@personal-agent/scheduler-core@workspace:packages/scheduler-core"],
+
+    "@personal-agent/session-store": ["@personal-agent/session-store@workspace:packages/session-store"],
+
+    "@personal-agent/shared": ["@personal-agent/shared@workspace:packages/shared"],
+
+    "@personal-agent/tool-router": ["@personal-agent/tool-router@workspace:packages/tool-router"],
+
+    "@types/bun": ["@types/bun@1.3.13", "", { "dependencies": { "bun-types": "1.3.13" } }, "sha512-9fqXWk5YIHGGnUau9TEi+qdlTYDAnOj+xLCmSTwXfAIqXr2x4tytJb43E9uCvt09zJURKXwAtkoH4nLQfzeTXw=="],
+
+    "@types/node": ["@types/node@24.12.3", "", { "dependencies": { "undici-types": "~7.16.0" } }, "sha512-8oljBDGun9cIsZRJR6fkihn0TSXJI0UDOOhncYaERq6M0JMDoPLxyscwruJcb4GKS6dvK/d8xebYBg27h/duaQ=="],
+
+    "bun-types": ["bun-types@1.3.13", "", { "dependencies": { "@types/node": "*" } }, "sha512-QXKeHLlOLqQX9LgYaHJfzdBaV21T63HhFJnvuRCcjZiaUDpbs5ED1MgxbMra71CsryN/1dAoXuJJJwIv/2drVA=="],
+
+    "typescript": ["typescript@5.9.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw=="],
+
+    "undici-types": ["undici-types@7.16.0", "", {}, "sha512-Zz+aZWSj8LE6zoxD+xrjh4VfkIG8Ya6LvYkZqtUQGJPZjYl53ypCaUwWqo7eI0x66KBGeRo+mlBEkMSeSZ38Nw=="],
+  }
+}

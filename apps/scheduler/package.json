@@ -1,0 +1,16 @@
+{
+  "name": "@personal-agent/scheduler-app",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "scripts": {
+    "check": "bunx tsc -p tsconfig.json --pretty",
+    "build": "bun run check"
+  },
+  "dependencies": {
+    "@personal-agent/config": "workspace:*",
+    "@personal-agent/scheduler-core": "workspace:*",
+    "@personal-agent/shared": "workspace:*"
+  }
+}
