@@ -1,5 +1,6 @@
 import type { AppConfig } from "@personal-agent/config";
-import { type ResolvedRuntimeResources, resolveRuntimeResources } from "@personal-agent/config";
+import { resolveRuntimeResources } from "@personal-agent/config";
+import { PiAgentRuntimeDriver } from "./pi-driver.js";
 import { DefaultResourceLoader } from "./resource-loader.js";
 import type {
   AgentRuntime,
@@ -7,52 +8,12 @@ import type {
   CreateRuntimeSessionInput,
   PromptRequest,
   PromptResult,
-  RuntimeResourceLoader,
-  RuntimeSession
+  RuntimeSession,
+  RuntimeSessionFactory,
+  RuntimeSessionFactoryCreateSessionInput
 } from "./types.js";
 
 const DEFAULT_SESSION_KEY = "local";
-
-interface RuntimeSessionFactory {
-  createSession(input: {
-    config: AppConfig;
-    sessionKey: string;
-    workspaceRoot: string;
-    resources: ResolvedRuntimeResources;
-    resourceLoader: RuntimeResourceLoader;
-  }): Promise<RuntimeSession>;
-}
-
-class MissingRuntimeDriverError extends Error {
-  constructor() {
-    super("Agent runtime driver is not configured yet.");
-    this.name = "MissingRuntimeDriverError";
-  }
-}
-
-class UnconfiguredRuntimeSession implements RuntimeSession {
-  readonly id = "unconfigured";
-  readonly sessionKey: string;
-  readonly workspaceRoot: string;
-
-  constructor(input: { sessionKey: string; workspaceRoot: string }) {
-    this.sessionKey = input.sessionKey;
-    this.workspaceRoot = input.workspaceRoot;
-  }
-
-  async runPrompt(_request: PromptRequest): Promise<PromptResult> {
-    throw new MissingRuntimeDriverError();
-  }
-}
-
-class UnconfiguredRuntimeSessionFactory implements RuntimeSessionFactory {
-  async createSession(input: {
-    sessionKey: string;
-    workspaceRoot: string;
-  }): Promise<RuntimeSession> {
-    return new UnconfiguredRuntimeSession(input);
-  }
-}
 
 class DefaultAgentRuntime implements AgentRuntime {
   readonly config: AppConfig;
@@ -79,7 +40,7 @@ class DefaultAgentRuntime implements AgentRuntime {
     }
 
     const resources = resolveRuntimeResources(resourceInput);
-    const sessionInput: Parameters<RuntimeSessionFactory["createSession"]>[0] = {
+    const sessionInput: RuntimeSessionFactoryCreateSessionInput = {
       config: this.config,
       sessionKey: input.sessionKey ?? DEFAULT_SESSION_KEY,
       workspaceRoot,
@@ -116,8 +77,6 @@ class DefaultAgentRuntime implements AgentRuntime {
 export function createAgentRuntime(input: CreateAgentRuntimeInput): AgentRuntime {
   return new DefaultAgentRuntime({
     config: input.config,
-    sessionFactory: new UnconfiguredRuntimeSessionFactory()
+    sessionFactory: new PiAgentRuntimeDriver()
   });
 }
-
-export { MissingRuntimeDriverError };
