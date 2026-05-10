@@ -80,6 +80,26 @@ Create one reusable way to start agent sessions.
 - shared resource loading for skills, prompts, extensions, AGENTS, SYSTEM
 - simple CLI command that starts a local session
 
+### Runtime boundary
+
+Apps use `createAgentRuntime({ config })` from `packages/agent-runtime`.
+
+The runtime owns:
+
+- requesting resolved resource roots from `packages/config`
+- loading `AGENTS.md`, `SYSTEM.md`, `APPEND_SYSTEM.md`, `skills/`, `prompts/`, and `extensions/`
+- adapting resources into `@earendil-works/pi-coding-agent`
+- creating Pi sessions through one driver path
+- normalizing prompt output/events into runtime-owned types
+
+Frontends pass a resolved workspace root. CLI may explicitly opt into
+workspace-local resources; gateway and scheduler should normally rely on global
+resources plus their resolved workspace state. Frontends should not import Pi
+directly.
+
+M1 uses in-memory Pi sessions. Durable sessions, transcripts, approvals, jobs,
+and memory remain control-plane work for later milestones.
+
 ### Suggested tasks
 
 1. Implement `createSession()` in `packages/agent-runtime`
@@ -93,6 +113,18 @@ Create one reusable way to start agent sessions.
    - `extensions/`
 4. Add a minimal CLI command in `apps/cli`
 5. Verify prompts can be sent locally
+
+Current local smoke path:
+
+```bash
+bun run start:cli -- chat run --cwd . "Summarize docs/roadmap/M1-shared-runtime.md"
+```
+
+This requires local Pi auth/model configuration. The non-auth smoke path is:
+
+```bash
+bun run start:cli -- --help
+```
 
 ### Exit criteria
 

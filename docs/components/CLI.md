@@ -65,6 +65,13 @@ One-shot:
 personal-agent chat run "Summarize the open questions in docs/"
 ```
 
+Current Bun workspace form:
+
+```bash
+bun run start:cli -- chat run "Summarize the open questions in docs/"
+bun run start:cli -- "Summarize the open questions in docs/"
+```
+
 Interactive:
 
 ```bash
@@ -98,10 +105,22 @@ personal-agent chat run "Review docs/components/SCHEMA.md for missing foreign ke
 Exact syntax:
 
 ```bash
-personal-agent chat run [--cwd <path>] [--model <model>] [--json] <prompt>
+personal-agent chat run [--cwd <path>] [--json] <prompt>
 personal-agent chat start [--cwd <path>] [--model <model>] [--session-key <key>] [--tui]
 personal-agent chat resume <session-id>
 ```
+
+The M1 CLI proof implements `chat run` only. It loads `AppConfig`, creates
+`AgentRuntime`, passes an explicit workspace root, opts into workspace-local
+resources, then prints the normalized `PromptResult`.
+
+`--cwd <path>` selects the workspace root for the runtime. Without `--cwd`, the
+CLI uses the process current working directory. The command also accepts prompt
+text on stdin and supports `--json` for the full normalized result.
+
+Live prompt execution requires Pi credentials and model settings that
+`@earendil-works/pi-coding-agent` can resolve from the local environment or
+`~/.personal-agent/`.
 
 ### `sessions`
 
