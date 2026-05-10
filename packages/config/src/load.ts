@@ -6,7 +6,22 @@ export function loadAppConfig(): AppConfig {
   return {
     runtime: {
       mode: "local",
-      workspaceRoot: join(homedir(), ".personal-agent", "workspaces")
+      workspaceRoot: join(homedir(), ".personal-agent", "workspaces"),
+      resources: {
+        globalRoot: join(homedir(), ".personal-agent"),
+        workspaceConfigDirName: ".personal-agent",
+        allowCliWorkspaceOverrides: true,
+        files: {
+          agents: "AGENTS.md",
+          system: "SYSTEM.md",
+          appendSystem: "APPEND_SYSTEM.md"
+        },
+        directories: {
+          skills: "skills",
+          prompts: "prompts",
+          extensions: "extensions"
+        }
+      }
     },
     auth: {
       uiMode: "token",

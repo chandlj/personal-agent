@@ -124,7 +124,22 @@ export interface RuntimeResourcePaths {
   extensionsDir: string;
 }
 
+export type RuntimeCallerSource = "cli" | "telegram" | "scheduler";
+
+export type RuntimeResourceRootKind = "global" | "workspace";
+
+export interface RuntimeResourceRoot {
+  kind: RuntimeResourceRootKind;
+  root: string;
+  paths: RuntimeResourcePaths;
+}
+
+export interface ResolvedRuntimeResources {
+  roots: RuntimeResourceRoot[];
+}
+
 export interface CreateRuntimeSessionInput {
+  source?: RuntimeCallerSource;
   sessionKey?: string;
   workspaceRoot?: string;
   resourcePaths?: Partial<RuntimeResourcePaths>;
@@ -132,6 +147,7 @@ export interface CreateRuntimeSessionInput {
 
 export interface PromptRequest {
   prompt: string;
+  source?: RuntimeCallerSource;
   sessionKey?: string;
   workspaceRoot?: string;
   metadata?: Record<string, unknown>;

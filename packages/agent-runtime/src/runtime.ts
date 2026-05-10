@@ -1,21 +1,26 @@
 import type { AppConfig } from "@personal-agent/config";
+import { resolveRuntimeResources } from "./resources.js";
 import type {
   AgentRuntime,
   CreateAgentRuntimeInput,
   CreateRuntimeSessionInput,
   PromptRequest,
   PromptResult,
+  ResolvedRuntimeResources,
+  RuntimeCallerSource,
   RuntimeSession
 } from "./types.js";
 
 const DEFAULT_SESSION_KEY = "local";
+const DEFAULT_SOURCE = "cli";
 
 interface RuntimeSessionFactory {
   createSession(input: {
     config: AppConfig;
+    source: RuntimeCallerSource;
     sessionKey: string;
     workspaceRoot: string;
-    resourcePaths?: CreateRuntimeSessionInput["resourcePaths"];
+    resources: ResolvedRuntimeResources;
   }): Promise<RuntimeSession>;
 }
 
@@ -60,15 +65,25 @@ class DefaultAgentRuntime implements AgentRuntime {
   }
 
   async createSession(input: CreateRuntimeSessionInput = {}): Promise<RuntimeSession> {
-    const sessionInput: Parameters<RuntimeSessionFactory["createSession"]>[0] = {
+    const source = input.source ?? DEFAULT_SOURCE;
+    const workspaceRoot = input.workspaceRoot ?? this.config.runtime.workspaceRoot;
+    const resourceInput: Parameters<typeof resolveRuntimeResources>[0] = {
       config: this.config,
-      sessionKey: input.sessionKey ?? DEFAULT_SESSION_KEY,
-      workspaceRoot: input.workspaceRoot ?? this.config.runtime.workspaceRoot
+      source,
+      workspaceRoot
     };
 
     if (input.resourcePaths !== undefined) {
-      sessionInput.resourcePaths = input.resourcePaths;
+      resourceInput.overrides = input.resourcePaths;
     }
+
+    const sessionInput: Parameters<RuntimeSessionFactory["createSession"]>[0] = {
+      config: this.config,
+      source,
+      sessionKey: input.sessionKey ?? DEFAULT_SESSION_KEY,
+      workspaceRoot,
+      resources: resolveRuntimeResources(resourceInput)
+    };
 
     return this.#sessionFactory.createSession(sessionInput);
   }
@@ -78,6 +93,10 @@ class DefaultAgentRuntime implements AgentRuntime {
 
     if (request.sessionKey !== undefined) {
       sessionInput.sessionKey = request.sessionKey;
+    }
+
+    if (request.source !== undefined) {
+      sessionInput.source = request.source;
     }
 
     if (request.workspaceRoot !== undefined) {
