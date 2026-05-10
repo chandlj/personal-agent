@@ -30,9 +30,7 @@ personal-agent/
   skills/
   prompts/
   extensions/
-  themes/
   docs/
-  scripts/
 ```
 
 ## Core Areas
@@ -76,7 +74,7 @@ Likely but still flexible packages:
 
 The purpose of `packages/` is to keep the architecture modular enough to support gateway, local operator entrypoints, and scheduler without duplicating system logic. It is not necessary for every possible package boundary to be fully realized immediately.
 
-### `skills/`, `prompts/`, `extensions/`, `themes/`
+### `skills/`, `prompts/`, `extensions/`
 
 These directories hold agent-facing customization resources rather than core system services.
 
@@ -85,7 +83,6 @@ Recommended meaning:
 - `skills/`: reusable skills and specialized instructions
 - `prompts/`: prompt templates and reusable prompt inputs
 - `extensions/`: runtime extensions and integrations
-- `themes/`: TUI and future UI theming
 
 These should remain structurally separate from core application code.
 
@@ -118,17 +115,6 @@ Use:
 - `research/` for historical and non-canonical material
 - `roadmap/` for milestone specs
 - `decisions/` for ADRs
-
-### `scripts/`
-
-Development and operational helper scripts.
-
-Typical examples:
-
-- local dev entry scripts
-- migration helpers
-- environment/bootstrap helpers
-- deployment support scripts
 
 ## App-Level Structure
 

@@ -161,6 +161,13 @@ When resolving resources for a session:
 1. load global files from `~/.personal-agent/`
 2. for operator-owned project roots used through the CLI, optionally load `<workspace-root>/.personal-agent/`
 
+The M1 runtime resource config uses these defaults:
+
+- global root: `~/.personal-agent/`
+- workspace override directory: `.personal-agent`
+- files: `AGENTS.md`, `SYSTEM.md`, `APPEND_SYSTEM.md`
+- directories: `skills/`, `prompts/`, `extensions/`
+
 Do not scan arbitrary ancestor directories in v1.
 
 Do not auto-load `.personal-agent/` from generated chat workspaces under `~/.personal-agent/workspaces/`.
