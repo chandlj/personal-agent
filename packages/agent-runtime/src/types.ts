@@ -1,4 +1,8 @@
-import type { AppConfig, RuntimeResourcePaths } from "@personal-agent/config";
+import type {
+  AppConfig,
+  RuntimeResourcePaths,
+  RuntimeResourceRootKind
+} from "@personal-agent/config";
 
 export type RuntimeEvent =
   | RuntimeSessionEvent
@@ -115,6 +119,49 @@ export interface RuntimeErrorEvent extends RuntimeEventBase {
   fatal?: boolean;
 }
 
+export type RuntimeResourceFileKind = "agents" | "system" | "append_system";
+
+export interface LoadedRuntimeResourceFile {
+  kind: RuntimeResourceFileKind;
+  path: string;
+  exists: boolean;
+  content?: string;
+}
+
+export type RuntimeResourceDirectoryKind = "skills" | "prompts" | "extensions";
+
+export interface LoadedRuntimeResourceDirectoryEntry {
+  name: string;
+  path: string;
+  type: "file" | "directory";
+}
+
+export interface LoadedRuntimeResourceDirectory {
+  kind: RuntimeResourceDirectoryKind;
+  path: string;
+  exists: boolean;
+  entries: LoadedRuntimeResourceDirectoryEntry[];
+}
+
+export interface LoadedRuntimeResource {
+  kind: RuntimeResourceRootKind;
+  root: string;
+  files: {
+    agents: LoadedRuntimeResourceFile;
+    system: LoadedRuntimeResourceFile;
+    appendSystem: LoadedRuntimeResourceFile;
+  };
+  directories: {
+    skills: LoadedRuntimeResourceDirectory;
+    prompts: LoadedRuntimeResourceDirectory;
+    extensions: LoadedRuntimeResourceDirectory;
+  };
+}
+
+export interface LoadedRuntimeResources {
+  roots: LoadedRuntimeResource[];
+}
+
 export interface CreateRuntimeSessionInput {
   includeWorkspaceResources?: boolean;
   sessionKey?: string;
@@ -148,6 +195,10 @@ export interface AgentRuntime {
   readonly config: AppConfig;
   createSession(input?: CreateRuntimeSessionInput): Promise<RuntimeSession>;
   runPrompt(request: PromptRequest): Promise<PromptResult>;
+}
+
+export interface RuntimeResourceLoader {
+  load(): Promise<LoadedRuntimeResources>;
 }
 
 export interface CreateAgentRuntimeInput {

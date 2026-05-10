@@ -1,11 +1,13 @@
 import type { AppConfig } from "@personal-agent/config";
 import { type ResolvedRuntimeResources, resolveRuntimeResources } from "@personal-agent/config";
+import { DefaultResourceLoader } from "./resource-loader.js";
 import type {
   AgentRuntime,
   CreateAgentRuntimeInput,
   CreateRuntimeSessionInput,
   PromptRequest,
   PromptResult,
+  RuntimeResourceLoader,
   RuntimeSession
 } from "./types.js";
 
@@ -17,6 +19,7 @@ interface RuntimeSessionFactory {
     sessionKey: string;
     workspaceRoot: string;
     resources: ResolvedRuntimeResources;
+    resourceLoader: RuntimeResourceLoader;
   }): Promise<RuntimeSession>;
 }
 
@@ -75,11 +78,15 @@ class DefaultAgentRuntime implements AgentRuntime {
       resourceInput.overrides = input.resourcePaths;
     }
 
+    const resources = resolveRuntimeResources(resourceInput);
     const sessionInput: Parameters<RuntimeSessionFactory["createSession"]>[0] = {
       config: this.config,
       sessionKey: input.sessionKey ?? DEFAULT_SESSION_KEY,
       workspaceRoot,
-      resources: resolveRuntimeResources(resourceInput)
+      resources,
+      resourceLoader: new DefaultResourceLoader({
+        resources
+      })
     };
 
     return this.#sessionFactory.createSession(sessionInput);
