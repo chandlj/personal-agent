@@ -22,7 +22,8 @@
     "lint:fix": "bunx biome check --write .",
     "start:cli": "bun apps/cli/src/index.ts",
     "start:gateway": "bun apps/gateway/src/index.ts",
-    "start:scheduler": "bun apps/scheduler/src/index.ts"
+    "start:scheduler": "bun apps/scheduler/src/index.ts",
+    "test": "bun test"
   },
   "engines": {
     "bun": ">=1.3.10"
