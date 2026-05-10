@@ -1,4 +1,4 @@
-import type { AppConfig } from "@personal-agent/config";
+import type { AppConfig, RuntimeResourcePaths } from "@personal-agent/config";
 
 export type RuntimeEvent =
   | RuntimeSessionEvent
@@ -115,16 +115,8 @@ export interface RuntimeErrorEvent extends RuntimeEventBase {
   fatal?: boolean;
 }
 
-export interface RuntimeResourcePaths {
-  agentFile: string;
-  systemFile: string;
-  appendSystemFile: string;
-  skillsDir: string;
-  promptsDir: string;
-  extensionsDir: string;
-}
-
 export interface CreateRuntimeSessionInput {
+  includeWorkspaceResources?: boolean;
   sessionKey?: string;
   workspaceRoot?: string;
   resourcePaths?: Partial<RuntimeResourcePaths>;
@@ -132,6 +124,7 @@ export interface CreateRuntimeSessionInput {
 
 export interface PromptRequest {
   prompt: string;
+  includeWorkspaceResources?: boolean;
   sessionKey?: string;
   workspaceRoot?: string;
   metadata?: Record<string, unknown>;

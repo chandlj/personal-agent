@@ -1,4 +1,5 @@
 import type { AppConfig } from "@personal-agent/config";
+import { type ResolvedRuntimeResources, resolveRuntimeResources } from "@personal-agent/config";
 import type {
   AgentRuntime,
   CreateAgentRuntimeInput,
@@ -15,7 +16,7 @@ interface RuntimeSessionFactory {
     config: AppConfig;
     sessionKey: string;
     workspaceRoot: string;
-    resourcePaths?: CreateRuntimeSessionInput["resourcePaths"];
+    resources: ResolvedRuntimeResources;
   }): Promise<RuntimeSession>;
 }
 
@@ -60,15 +61,26 @@ class DefaultAgentRuntime implements AgentRuntime {
   }
 
   async createSession(input: CreateRuntimeSessionInput = {}): Promise<RuntimeSession> {
+    const workspaceRoot = input.workspaceRoot ?? this.config.runtime.workspaceRoot;
+    const resourceInput: Parameters<typeof resolveRuntimeResources>[0] = {
+      config: this.config,
+      workspaceRoot
+    };
+
+    if (input.includeWorkspaceResources !== undefined) {
+      resourceInput.includeWorkspaceResources = input.includeWorkspaceResources;
+    }
+
+    if (input.resourcePaths !== undefined) {
+      resourceInput.overrides = input.resourcePaths;
+    }
+
     const sessionInput: Parameters<RuntimeSessionFactory["createSession"]>[0] = {
       config: this.config,
       sessionKey: input.sessionKey ?? DEFAULT_SESSION_KEY,
-      workspaceRoot: input.workspaceRoot ?? this.config.runtime.workspaceRoot
+      workspaceRoot,
+      resources: resolveRuntimeResources(resourceInput)
     };
-
-    if (input.resourcePaths !== undefined) {
-      sessionInput.resourcePaths = input.resourcePaths;
-    }
 
     return this.#sessionFactory.createSession(sessionInput);
   }
@@ -78,6 +90,10 @@ class DefaultAgentRuntime implements AgentRuntime {
 
     if (request.sessionKey !== undefined) {
       sessionInput.sessionKey = request.sessionKey;
+    }
+
+    if (request.includeWorkspaceResources !== undefined) {
+      sessionInput.includeWorkspaceResources = request.includeWorkspaceResources;
     }
 
     if (request.workspaceRoot !== undefined) {
