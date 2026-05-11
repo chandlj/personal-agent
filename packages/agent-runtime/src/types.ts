@@ -190,6 +190,7 @@ export interface RuntimeSession {
   sessionKey: string;
   workspaceRoot: string;
   runPrompt(request: PromptRequest): Promise<PromptResult>;
+  dispose(): void;
 }
 
 export interface AgentRuntime {
@@ -216,4 +217,5 @@ export interface RuntimeSessionFactory {
 
 export interface CreateAgentRuntimeInput {
   config: AppConfig;
+  sessionFactory?: RuntimeSessionFactory;
 }
