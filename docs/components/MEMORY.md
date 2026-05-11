@@ -34,7 +34,7 @@ Those limits should stay configurable, but the default should be tight enough th
 `MEMORY.md`
 
 ```md
-Project uses pnpm. Run tests with `pnpm test`. Main repo is at ~/projects/personal-agent.
+Project uses Bun. Run tests with `bun test`. Main repo is at ~/projects/personal-agent.
 ```
 
 `USER.md`
