@@ -11,6 +11,7 @@ import {
   SessionManager,
   SettingsManager
 } from "@earendil-works/pi-coding-agent";
+import { normalizePiEvent } from "./pi-events.js";
 import type {
   LoadedRuntimeResource,
   LoadedRuntimeResourceDirectory,
@@ -77,7 +78,48 @@ class PiRuntimeSession implements RuntimeSession {
   }
 
   async runPrompt(_request: PromptRequest): Promise<PromptResult> {
-    throw new Error("Pi prompt execution is not implemented yet.");
+    const events: PromptResult["events"] = [];
+    const textDeltas: string[] = [];
+    let finalAssistantText: string | undefined;
+    const unsubscribe = this.#session.subscribe((event) => {
+      const normalized = normalizePiEvent(event);
+
+      if (normalized === undefined) {
+        return;
+      }
+
+      events.push(normalized.event);
+
+      if (normalized.textDelta !== undefined) {
+        textDeltas.push(normalized.textDelta);
+      }
+
+      if (normalized.finalAssistantText !== undefined) {
+        finalAssistantText = normalized.finalAssistantText;
+      }
+    });
+
+    try {
+      await this.#session.prompt(_request.prompt, { source: "rpc" });
+    } catch (error) {
+      events.push({
+        kind: "error",
+        message: error instanceof Error ? error.message : String(error),
+        timestamp: new Date()
+      });
+      throw error;
+    } finally {
+      unsubscribe();
+    }
+
+    return {
+      sessionId: this.id,
+      text: finalAssistantText ?? textDeltas.join(""),
+      events,
+      metadata: {
+        provider: "pi"
+      }
+    };
   }
 
   dispose(): void {

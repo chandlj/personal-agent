@@ -60,7 +60,7 @@ Example:
 ```json
 {
   "toolName": "bash",
-  "arguments": { "command": "pnpm test" }
+  "arguments": { "command": "bun test" }
 }
 ```
 
