@@ -7,10 +7,15 @@
   "types": "./src/index.ts",
   "scripts": {
     "check": "bunx tsc -p tsconfig.json --pretty",
-    "build": "bun run check"
+    "build": "bun run check",
+    "db:generate": "bunx drizzle-kit generate --config drizzle.config.ts"
   },
   "dependencies": {
-    "@personal-agent/shared": "workspace:*"
+    "@personal-agent/shared": "workspace:*",
+    "drizzle-orm": "^0.45.2"
+  },
+  "devDependencies": {
+    "drizzle-kit": "^0.31.10"
   },
   "exports": {
     ".": {

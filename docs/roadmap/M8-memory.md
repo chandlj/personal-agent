@@ -18,7 +18,7 @@ The agent becomes materially more useful once it can retain compact prompt memor
 - implement bounded `MEMORY.md` and `USER.md`
 - add `add/replace/remove` memory operations
 - mirror memory edits into SQLite audit rows
-- add transcript FTS5 search
+- use session-entry FTS search for transcript recall
 - add lightweight summarization over search hits
 
 ## Non-goals
@@ -36,7 +36,7 @@ The agent becomes materially more useful once it can retain compact prompt memor
 
 - memory files load into sessions
 - memory entries can be updated safely
-- old transcript content can be searched and summarized
+- old session-entry content can be searched and summarized
 
 ## Open questions
 

@@ -103,8 +103,8 @@ metadata. Model/provider, thinking-level, auth, tool allowlists, memory,
 persistence, approvals, and delivery metadata are deferred until the milestones
 that own those concerns.
 
-M1 uses in-memory Pi sessions. Durable sessions, transcripts, approvals, jobs,
-and memory remain control-plane work for later milestones.
+M1 uses in-memory Pi sessions. Durable sessions, session-entry history,
+approvals, jobs, and memory remain control-plane work for later milestones.
 
 ### Suggested tasks
 
@@ -142,7 +142,7 @@ bun run start:cli -- --help
 
 ### Goal
 
-Create the SQLite foundation for workspaces, sessions, transcripts, and jobs.
+Create the SQLite foundation required for chat and gateway usage.
 
 ### Deliverables
 
@@ -152,14 +152,10 @@ Create the SQLite foundation for workspaces, sessions, transcripts, and jobs.
 
 ### Suggested tables
 
-- `sessions`
 - `workspaces`
-- `transcripts`
-- `jobs`
-- `job_runs`
-- `job_deliveries`
-- `approvals`
-- `memory_entries`
+- `sessions`
+- `session_entries`
+- `session_entries_fts`
 
 ### Suggested tasks
 
@@ -169,14 +165,14 @@ Create the SQLite foundation for workspaces, sessions, transcripts, and jobs.
 4. Persist:
    - workspace registry
    - session metadata
-   - transcript messages
-   - basic job definitions
+   - active session routing
+   - session-entry tree history
 
 ### Exit criteria
 
 - workspaces and sessions can be created and queried
-- transcripts can be written and searched by session
-- jobs can be stored
+- session entries can be written as a tree and searched by session
+- the active leaf can be updated for branch/rewind semantics
 
 ## Milestone 3: Sandbox foundation
 
@@ -247,7 +243,7 @@ Get a working Telegram-connected agent.
 - Telegram adapter using `grammy`
 - per-session queueing
 - authorization checks
-- transcript persistence
+- session-entry persistence
 
 ### Suggested tasks
 
@@ -260,7 +256,7 @@ Get a working Telegram-connected agent.
    - file downloads
    - outbound messages
 5. Enforce `TELEGRAM_ALLOWED_USERS`
-6. Persist transcript events
+6. Persist session-entry events
 
 ### Exit criteria
 

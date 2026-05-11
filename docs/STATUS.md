@@ -3,15 +3,15 @@
 ## Current phase
 
 - active roadmap phase: `v1`
-- active milestone: `M1 shared runtime`
+- active milestone: `M2 control plane`
 
 ## Milestone status
 
 | Milestone | Status | Notes |
 |---|---|---|
 | `M0` Repo bootstrap | `complete` | Bun workspace scaffold, Biome, no-emit TypeScript, placeholder apps, and initial packages are in place |
-| `M1` Shared runtime | `next` | Depends on scaffold |
-| `M2` Control plane | `not started` | Schema and workspace model are defined |
+| `M1` Shared runtime | `complete` | Shared runtime API, Pi driver, resource loading, and CLI proof path are in place |
+| `M2` Control plane | `in progress` | Scope narrowed to chat/gateway storage: workspaces, sessions, session entries, and search |
 | `M3` Sandbox foundation | `not started` | Docker-first policy is defined |
 | `M4` Tool router | `not started` | Depends on M1 and M3 |
 | `M5` Telegram gateway | `not started` | Depends on M1, M2, and M4 |
@@ -23,9 +23,9 @@
 
 ## Immediate next steps
 
-1. Implement the shared Pi runtime wrapper.
-2. Prove local CLI prompting works through the shared runtime.
-3. Implement the workspace-aware SQLite control plane.
+1. Align the initial Drizzle migration with the narrowed M2 schema.
+2. Implement workspace, session, and session-entry repositories.
+3. Wire gateway/CLI persistence through the session-store package.
 
 ## Update rule
 

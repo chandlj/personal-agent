@@ -20,7 +20,7 @@ This is the first real end-user surface and validates the architecture.
 - implement Telegram adapter on `grammy`
 - authorize users via allowlist
 - download attachments into the chat workspace
-- persist transcript events
+- persist session-entry events
 
 ## Non-goals
 
@@ -37,7 +37,7 @@ This is the first real end-user surface and validates the architecture.
 - Telegram messages reach the agent
 - the agent can respond
 - unauthorized users are denied
-- transcripts are persisted
+- session-entry events are persisted
 
 ## Open questions
 

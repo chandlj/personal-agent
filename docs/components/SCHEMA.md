@@ -4,17 +4,21 @@
 
 Use SQLite as the single local control-plane database.
 
-It should own:
+For M2, SQLite owns only the state required for chat and gateway usage:
 
 - workspace registry
-- session metadata
-- transcript storage
-- scheduled jobs
-- approvals
-- memory metadata
-- job delivery audit
+- session metadata and active-session routing
+- session-entry tree history
+- full-text search over session-entry text
 
-Keep large binary files and downloaded attachments on disk, not in SQLite.
+Later milestones add their own tables:
+
+- M6 Approvals: `approvals`
+- M7 Scheduler: `jobs`, `job_runs`, `job_deliveries`
+- M8 Memory: `memory_entries`
+- v2 Inter-agent: `agent_endpoints`, `agent_messages`
+
+Keep large binary files, downloaded attachments, workspace sandboxes, and canonical memory files on disk, not in SQLite.
 
 ## Database file
 
@@ -28,19 +32,15 @@ Suggested path:
 
 Use numbered forward-only migrations.
 
-Recommended naming:
+Recommended split:
 
-- `0001_initial.sql`
-- `0002_inter_agent.sql`
-- `0003_post_v1_features.sql`
+- `0001_initial.sql` - chat/gateway control plane
+- M6 migration - approvals
+- M7 migration - scheduler jobs and delivery audit
+- M8 migration - memory audit metadata
+- v2 migration - inter-agent mailbox
 
-For now, the scaffold includes:
-
-- `0001_initial.sql`
-
-Reserve `0002_inter_agent.sql` for the post-v1 mailbox work.
-
-## Core tables
+## M2 Core Tables
 
 ### `workspaces`
 
@@ -68,34 +68,16 @@ Indexes:
 - index on `platform`, `chat_id`
 - index on `parent_workspace_id`
 
-Example DDL:
-
-```sql
-CREATE TABLE workspaces (
-  id TEXT PRIMARY KEY,
-  workspace_key TEXT NOT NULL UNIQUE,
-  agent_id TEXT NOT NULL,
-  platform TEXT,
-  chat_id TEXT,
-  thread_id TEXT,
-  parent_workspace_id TEXT REFERENCES workspaces(id),
-  root_path TEXT NOT NULL,
-  created_at TEXT NOT NULL,
-  updated_at TEXT NOT NULL,
-  last_used_at TEXT NOT NULL
-);
-```
-
 ### `sessions`
 
-Tracks conversation instances across CLI, gateway, and scheduler.
+Tracks conversation instances across CLI and gateway frontends.
 
 The important distinction is:
 
 - `session_key` is the stable route key for a chat or local binding
 - `id` is the concrete conversation instance
 
-That means `/new` and `/reset` create a new session row with the same `session_key` while archiving the previous active row.
+That means `/new`, `/reset`, `/fork`, or `/clone` can create a new session row while preserving durable lineage.
 
 Columns:
 
@@ -103,8 +85,12 @@ Columns:
 - `workspace_id` - foreign key to `workspaces`
 - `agent_id` - logical agent name such as `main`
 - `session_key` - stable route key such as `agent:main:telegram:dm:12345`
-- `reset_from_session_id` - nullable self-reference to the prior session row when the session was started via `/new` or `/reset`
-- `source` - `cli`, `telegram`, `scheduler`, etc.
+- `parent_session_id` - nullable self-reference for sessions created from another session
+- `runtime_provider` - runtime owner, such as `pi`
+- `runtime_session_id` - nullable provider/runtime session id
+- `runtime_session_path` - nullable provider/runtime session file path
+- `active_leaf_entry_id` - nullable foreign key to the current `session_entries` leaf
+- `source` - `cli`, `telegram`, etc.
 - `platform` - nullable platform name
 - `chat_id` - nullable chat identifier
 - `thread_id` - nullable thread identifier
@@ -119,342 +105,93 @@ Indexes:
 - index on `session_key`
 - partial unique index on `session_key` where `status = 'active'`
 - index on `workspace_id`
+- index on `parent_session_id`
+- index on `runtime_provider`, `runtime_session_id`
 - index on `source`
 - index on `platform`, `chat_id`
 
-Example DDL:
+### `session_entries`
 
-```sql
-CREATE TABLE sessions (
-  id TEXT PRIMARY KEY,
-  workspace_id TEXT NOT NULL REFERENCES workspaces(id),
-  agent_id TEXT NOT NULL,
-  session_key TEXT NOT NULL,
-  reset_from_session_id TEXT REFERENCES sessions(id),
-  source TEXT NOT NULL,
-  platform TEXT,
-  chat_id TEXT,
-  thread_id TEXT,
-  title TEXT,
-  status TEXT NOT NULL CHECK (status IN ('active', 'archived', 'closed')),
-  created_at TEXT NOT NULL,
-  updated_at TEXT NOT NULL,
-  last_message_at TEXT
-);
+Stores the append-only conversation history for a session.
 
-CREATE UNIQUE INDEX sessions_active_session_key_idx
-  ON sessions(session_key)
-  WHERE status = 'active';
-```
+Session entries form a tree rather than a flat list. Each entry points at its parent entry, and the session row records the active leaf. Building runtime context means walking from the active leaf back to the root and then reversing that path.
 
-### `transcripts`
-
-Stores the normalized transcript stream for each session.
+This shape is runtime-neutral, but it is intentionally compatible with Pi's session model, where `/tree` moves the active leaf and `/fork` or `/clone` creates a new session from an existing path.
 
 Columns:
 
 - `id` - primary key
 - `session_id` - foreign key to `sessions`
-- `role` - `system`, `user`, `assistant`, `tool`
-- `message_type` - normalized subtype such as `text`, `tool_call`, `tool_result`, `status`
-- `text` - canonical text content
-- `payload_json` - structured metadata
+- `parent_entry_id` - nullable foreign key to `session_entries`
+- `runtime_entry_id` - nullable provider/runtime entry id
+- `entry_type` - `message`, `state_change`, `compaction`, `branch_summary`, `label`, `metadata`, or `custom`
+- `role` - nullable role such as `system`, `user`, `assistant`, `tool`, or `custom`
+- `message_type` - nullable subtype such as `text`, `attachment`, `tool_call`, `tool_result`, or `status`
+- `text` - canonical searchable text content
+- `payload_json` - runtime-neutral structured metadata
+- `runtime_payload_json` - provider/runtime-specific raw payload when useful
 - `created_at`
 
 Indexes:
 
 - index on `session_id`, `created_at`
-- full-text search handled by companion FTS table
+- index on `session_id`, `parent_entry_id`
+- unique index on `session_id`, `runtime_entry_id` where `runtime_entry_id IS NOT NULL`
 
-Example DDL:
+### `session_entries_fts`
 
-```sql
-CREATE TABLE transcripts (
-  id TEXT PRIMARY KEY,
-  session_id TEXT NOT NULL REFERENCES sessions(id),
-  role TEXT NOT NULL CHECK (role IN ('system', 'user', 'assistant', 'tool')),
-  message_type TEXT NOT NULL,
-  text TEXT,
-  payload_json TEXT,
-  created_at TEXT NOT NULL
-);
-```
-
-### `transcripts_fts`
-
-FTS5 virtual table for transcript search.
+FTS5 virtual table for session-entry search.
 
 Suggested fields:
 
+- `entry_id`
+- `session_id`
 - `text`
-- `session_id`
-- `transcript_id`
 
-Keep the FTS table synchronized via triggers.
+Keep the FTS table synchronized via triggers on `session_entries`.
 
-### `jobs`
-
-Stores scheduled job definitions.
-
-Columns:
-
-- `id`
-- `name`
-- `prompt`
-- `schedule`
-- `timezone`
-- `delivery_target`
-- `workspace_id`
-- `origin_session_id`
-- `enabled`
-- `skills_json`
-- `created_by`
-- `created_at`
-- `updated_at`
-- `last_run_at`
-- `next_run_at`
-
-Indexes:
-
-- index on `enabled`, `next_run_at`
-- index on `workspace_id`
-
-Example DDL:
-
-```sql
-CREATE TABLE jobs (
-  id TEXT PRIMARY KEY,
-  name TEXT NOT NULL,
-  prompt TEXT NOT NULL,
-  schedule TEXT NOT NULL,
-  timezone TEXT NOT NULL,
-  delivery_target TEXT NOT NULL,
-  workspace_id TEXT NOT NULL REFERENCES workspaces(id),
-  origin_session_id TEXT REFERENCES sessions(id),
-  enabled INTEGER NOT NULL DEFAULT 1,
-  skills_json TEXT,
-  created_by TEXT,
-  created_at TEXT NOT NULL,
-  updated_at TEXT NOT NULL,
-  last_run_at TEXT,
-  next_run_at TEXT
-);
-```
-
-### `job_runs`
-
-Stores each execution of a scheduled job.
-
-Columns:
-
-- `id`
-- `job_id`
-- `status` - `running`, `success`, `failed`, `cancelled`
-- `started_at`
-- `finished_at`
-- `session_id`
-- `output_text`
-- `error_text`
-
-Indexes:
-
-- index on `job_id`, `started_at`
-
-### `job_deliveries`
-
-Stores outbound delivery attempts for scheduled job runs.
-
-Columns:
-
-- `id`
-- `job_run_id`
-- `target`
-- `status` - `pending`, `sent`, `failed`
-- `platform` - nullable platform name
-- `chat_id` - nullable chat identifier
-- `path` - nullable file target
-- `external_message_id` - nullable provider message id
-- `attempted_at`
-- `delivered_at`
-- `error_text`
-
-Indexes:
-
-- index on `job_run_id`, `attempted_at`
-
-### `approvals`
-
-Stores pending and resolved dangerous-action approvals.
-
-These rows are an audit and operator-control surface, not a durable continuation queue.
-
-For v1, approval resumption is best-effort:
-
-- if the originating process is still waiting, it may resume
-- if the process restarted or lost state, the approval remains recorded but the action must be retried
-
-Columns:
-
-- `id`
-- `session_id`
-- `approval_type` - `host_command`, `applescript`, etc.
-- `request_text`
-- `request_payload_json`
-- `status` - `pending`, `approved`, `denied`, `expired`
-- `requested_by`
-- `resolved_by`
-- `requested_at`
-- `resolved_at`
-
-Indexes:
-
-- index on `status`, `requested_at`
-
-Example DDL:
-
-```sql
-CREATE TABLE approvals (
-  id TEXT PRIMARY KEY,
-  session_id TEXT NOT NULL REFERENCES sessions(id),
-  approval_type TEXT NOT NULL,
-  request_text TEXT NOT NULL,
-  request_payload_json TEXT,
-  status TEXT NOT NULL CHECK (status IN ('pending', 'approved', 'denied', 'expired')),
-  requested_by TEXT,
-  resolved_by TEXT,
-  requested_at TEXT NOT NULL,
-  resolved_at TEXT
-);
-```
-
-### `memory_entries`
-
-Stores a structured mirror and audit trail for file-backed prompt memory.
-
-`MEMORY.md` and `USER.md` remain canonical. This table is written by the memory service whenever it changes those files.
-
-Columns:
-
-- `id`
-- `store` - `memory` or `user`
-- `entry_key`
-- `content`
-- `source`
-- `session_id`
-- `status` - `active`, `superseded`, `deleted`
-- `created_at`
-- `updated_at`
-
-Indexes:
-
-- index on `store`, `status`, `updated_at`
-
-## Required foreign key relationships
+## Required M2 Foreign Keys
 
 Use real foreign keys for the core graph.
 
 - `sessions.workspace_id` -> `workspaces.id`
-- `transcripts.session_id` -> `sessions.id`
-- `jobs.workspace_id` -> `workspaces.id`
-- `jobs.origin_session_id` -> `sessions.id`
-- `sessions.reset_from_session_id` -> `sessions.id`
-- `job_runs.job_id` -> `jobs.id`
-- `job_runs.session_id` -> `sessions.id`
-- `job_deliveries.job_run_id` -> `job_runs.id`
-- `approvals.session_id` -> `sessions.id`
-- `memory_entries.session_id` -> `sessions.id`
+- `sessions.parent_session_id` -> `sessions.id`
+- `sessions.active_leaf_entry_id` -> `session_entries.id`
+- `session_entries.session_id` -> `sessions.id`
+- `session_entries.parent_entry_id` -> `session_entries.id`
 
-Prefer soft deletes for `workspaces`, `sessions`, and `jobs` rather than hard-deleting rows that still have transcript or audit history attached.
+Prefer soft deletes for `workspaces` and `sessions` rather than hard-deleting rows that still have transcript or audit history attached.
 
-## Post-v1 tables
+## Deferred Tables
 
-### `agent_endpoints`
+### M6: `approvals`
 
-Tracks live or recently seen agent endpoints.
+Stores pending and resolved dangerous-action approvals.
 
-Columns:
+These rows are an audit and operator-control surface, not a durable continuation queue. Approval resumption is best-effort: if the originating process is still waiting, it may resume; otherwise the approval remains recorded and the action must be retried.
 
-- `agent_id`
-- `session_id`
-- `runtime_type` - `embedded`, `worker`, `scheduler`, `gateway`
-- `status` - `online`, `idle`, `busy`, `offline`
-- `process_id`
-- `capabilities_json`
-- `last_seen_at`
-- `created_at`
+### M7: `jobs`, `job_runs`, `job_deliveries`
 
-Indexes:
+Stores scheduled job definitions, each scheduled execution, and outbound delivery attempts for run results.
 
-- primary key on `agent_id`
-- index on `status`
+### M8: `memory_entries`
 
-### `agent_messages`
+Stores a structured mirror and audit trail for file-backed prompt memory. `MEMORY.md` and `USER.md` remain canonical.
 
-Durable mailbox for cross-process or deferred inter-agent communication.
+### v2: `agent_endpoints`, `agent_messages`
 
-Columns:
+Tracks live agent endpoints and durable cross-process inter-agent messages.
 
-- `id`
-- `from_agent_id`
-- `to_agent_id`
-- `message_type`
-- `payload_json`
-- `status` - `pending`, `delivered`, `acknowledged`, `failed`
-- `correlation_id`
-- `created_at`
-- `delivered_at`
-- `acknowledged_at`
-- `error_text`
-
-Indexes:
-
-- index on `to_agent_id`, `status`, `created_at`
-- index on `correlation_id`
-
-## File-backed state that should not live in SQLite
-
-- downloaded Telegram files
-- workspace sandboxes
-- canonical `MEMORY.md` and `USER.md`
-- long exported transcripts
-
-## Recommended first migration split
-
-### `0001_initial.sql`
-
-Include:
-
-- `workspaces`
-- `sessions`
-- `transcripts`
-- `transcripts_fts`
-- triggers for transcript FTS sync
-- `jobs`
-- `job_runs`
-- `job_deliveries`
-- `approvals`
-- `memory_entries`
-
-### `0002_inter_agent.sql`
-
-Include:
-
-- `agent_endpoints`
-- `agent_messages`
-
-This keeps the core app schema separate from the inter-agent layer.
-
-## Suggested repository ownership
+## Suggested Repository Ownership
 
 `packages/session-store` should own typed repositories for:
 
 - workspaces
 - sessions
-- transcripts
-- jobs
-- job deliveries
-- approvals
-- memory
-- agent mailbox
+- session entries
+- approvals, added in M6
+- jobs and job deliveries, added in M7
+- memory, added in M8
+- agent mailbox, added in v2
 
-Do not let gateway or scheduler apps write raw SQL directly once this package is in place.
+Do not let gateway, scheduler, approval, or memory packages write raw SQL directly once their repositories exist.
