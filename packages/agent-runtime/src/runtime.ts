@@ -70,13 +70,17 @@ class DefaultAgentRuntime implements AgentRuntime {
 
     const session = await this.createSession(sessionInput);
 
-    return session.runPrompt(request);
+    try {
+      return await session.runPrompt(request);
+    } finally {
+      session.dispose();
+    }
   }
 }
 
 export function createAgentRuntime(input: CreateAgentRuntimeInput): AgentRuntime {
   return new DefaultAgentRuntime({
     config: input.config,
-    sessionFactory: new PiAgentRuntimeDriver()
+    sessionFactory: input.sessionFactory ?? new PiAgentRuntimeDriver()
   });
 }
