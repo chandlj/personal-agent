@@ -99,6 +99,9 @@ Use this only for operator-owned CLI project workspaces, not for generated Teleg
     "maxConcurrentRuns": 2,
     "defaultTimezone": "America/New_York"
   },
+  "state": {
+    "databasePath": "~/.personal-agent/state/state.db"
+  },
   "auth": {
     "uiMode": "token",
     "apiMode": "token",
@@ -142,6 +145,9 @@ type PersonalAgentConfig = {
   scheduler: {
     maxConcurrentRuns: number;
     defaultTimezone: string;
+  };
+  state: {
+    databasePath: string;
   };
   auth: {
     uiMode: "token" | "password" | "tailscale";

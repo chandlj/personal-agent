@@ -1,22 +1,5 @@
-export interface SessionRecord {
-  id: string;
-  key: string;
-  source: "cli" | "telegram" | "scheduler";
-  createdAt: string;
-}
+import type { sessionEntries, sessions } from "./schema.js";
 
-export interface TranscriptRecord {
-  id: string;
-  sessionId: string;
-  role: "user" | "assistant" | "system" | "tool";
-  text: string;
-  createdAt: string;
-}
+export type SessionRecord = typeof sessions.$inferSelect;
 
-export interface JobRecord {
-  id: string;
-  name: string;
-  schedule: string;
-  enabled: boolean;
-  createdAt: string;
-}
+export type SessionEntryRecord = typeof sessionEntries.$inferSelect;

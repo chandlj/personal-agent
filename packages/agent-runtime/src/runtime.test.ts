@@ -187,6 +187,9 @@ function testConfig(input: { globalRoot: string; workspaceRoot: string }): AppCo
     },
     scheduler: {
       tickIntervalMs: 60_000
+    },
+    state: {
+      databasePath: ":memory:"
     }
   };
 }

@@ -324,7 +324,7 @@ Do not create a CLI-only runtime path.
 
 ### Persistence
 
-CLI sessions should persist to the same `sessions` and `transcripts` tables as other frontends.
+CLI sessions should persist to the same `sessions` and `session_entries` tables as other frontends.
 
 If the operator starts a fresh session with `/new` inside an interactive run, the current active session row should be archived and a fresh session row should be created for the same route key and workspace.
 

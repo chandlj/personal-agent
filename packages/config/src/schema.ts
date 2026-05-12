@@ -49,10 +49,15 @@ export interface SchedulerConfig {
   tickIntervalMs: number;
 }
 
+export interface StateConfig {
+  databasePath: string;
+}
+
 export interface AppConfig {
   runtime: RuntimeConfig;
   auth: AuthConfig;
   platforms: PlatformConfig;
   sandbox: SandboxConfig;
   scheduler: SchedulerConfig;
+  state: StateConfig;
 }

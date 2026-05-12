@@ -43,6 +43,9 @@ export function loadAppConfig(): AppConfig {
     },
     scheduler: {
       tickIntervalMs: 60_000
+    },
+    state: {
+      databasePath: join(personalAgentRoot, "state", "state.db")
     }
   };
 }
