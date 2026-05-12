@@ -1,7 +1,8 @@
 import { Database } from "bun:sqlite";
 import { mkdir } from "node:fs/promises";
-import { dirname, join } from "node:path";
+import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import type { AppConfig } from "@personal-agent/config";
 import { type BunSQLiteDatabase, drizzle } from "drizzle-orm/bun-sqlite";
 import { migrate } from "drizzle-orm/bun-sqlite/migrator";
 import * as schema from "./schema.js";
@@ -13,8 +14,8 @@ export interface AppliedMigration {
 }
 
 export interface OpenSessionStoreInput {
+  config?: AppConfig;
   databasePath?: string;
-  homeDir?: string;
   migrationsFolder?: string;
 }
 
@@ -26,15 +27,14 @@ export interface SessionStoreDatabase {
   close(): void;
 }
 
-export function defaultDatabasePath(homeDir: string): string {
-  return join(homeDir, ".personal-agent", "state", "state.db");
-}
-
 export async function openSessionStore(
   input: OpenSessionStoreInput = {}
 ): Promise<SessionStoreDatabase> {
-  const databasePath =
-    input.databasePath ?? defaultDatabasePath(input.homeDir ?? process.env.HOME ?? ".");
+  const databasePath = input.databasePath ?? input.config?.state.databasePath;
+
+  if (databasePath === undefined) {
+    throw new Error("openSessionStore requires databasePath or config.state.databasePath");
+  }
 
   if (!isMemoryDatabase(databasePath)) {
     await mkdir(dirname(databasePath), { recursive: true });

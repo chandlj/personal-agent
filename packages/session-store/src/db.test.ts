@@ -3,8 +3,9 @@ import { afterEach, describe, expect, test } from "bun:test";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { loadAppConfig } from "@personal-agent/config";
 import { eq } from "drizzle-orm";
-import { defaultDatabasePath, listAppliedMigrations, openSessionStore } from "./db.js";
+import { listAppliedMigrations, openSessionStore } from "./db.js";
 import { sessionEntries, sessions, workspaces } from "./schema.js";
 
 const tempDirs: string[] = [];
@@ -16,13 +17,19 @@ afterEach(async () => {
 });
 
 describe("session-store database bootstrap", () => {
-  test("opens the default database path under the provided home directory", async () => {
-    const homeDir = await createTempDir();
-    const store = await openSessionStore({ homeDir });
+  test("opens the configured database path", async () => {
+    const tempDir = await createTempDir();
+    const databasePath = join(tempDir, "state", "state.db");
+    const store = await openSessionStore({
+      config: {
+        ...loadAppConfig(),
+        state: { databasePath }
+      }
+    });
 
     try {
-      expect(store.path).toBe(defaultDatabasePath(homeDir));
-      expect(store.listAppliedMigrations()).toHaveLength(1);
+      expect(store.path).toBe(databasePath);
+      expect(store.listAppliedMigrations()).toHaveLength(2);
       expect(readForeignKeyPragma(store.sqlite)).toBe(1);
 
       const tables = listTables(store.sqlite);
@@ -51,8 +58,8 @@ describe("session-store database bootstrap", () => {
     const secondStore = await openSessionStore({ databasePath });
 
     try {
-      expect(secondStore.listAppliedMigrations()).toHaveLength(1);
-      expect(countRows(secondStore.sqlite, "__drizzle_migrations")).toBe(1);
+      expect(secondStore.listAppliedMigrations()).toHaveLength(2);
+      expect(countRows(secondStore.sqlite, "__drizzle_migrations")).toBe(2);
     } finally {
       secondStore.close();
     }
@@ -63,6 +70,10 @@ describe("session-store database bootstrap", () => {
 
     try {
       expect(listAppliedMigrations(store.sqlite)).toEqual([
+        expect.objectContaining({
+          hash: expect.any(String),
+          createdAt: expect.any(Number)
+        }),
         expect.objectContaining({
           hash: expect.any(String),
           createdAt: expect.any(Number)
@@ -119,7 +130,6 @@ describe("session-store database bootstrap", () => {
               INSERT INTO sessions (
                 id,
                 workspace_id,
-                agent_id,
                 session_key,
                 runtime_provider,
                 source,
@@ -130,7 +140,6 @@ describe("session-store database bootstrap", () => {
               VALUES (
                 'session-duplicate',
                 'workspace-1',
-                'main',
                 'agent:main:telegram:dm:12345',
                 'pi',
                 'telegram',
@@ -158,7 +167,6 @@ describe("session-store database bootstrap", () => {
               INSERT INTO sessions (
                 id,
                 workspace_id,
-                agent_id,
                 session_key,
                 runtime_provider,
                 source,
@@ -169,7 +177,6 @@ describe("session-store database bootstrap", () => {
               VALUES (
                 'session-invalid-workspace',
                 'missing-workspace',
-                'main',
                 'agent:main:telegram:dm:missing',
                 'pi',
                 'telegram',
@@ -499,7 +506,6 @@ async function insertSession(
   await db.insert(sessions).values({
     id: "session-1",
     workspaceId: "workspace-1",
-    agentId: "main",
     sessionKey: "agent:main:cli:local",
     runtimeProvider: "pi",
     source: "cli",

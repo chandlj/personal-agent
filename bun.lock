@@ -98,6 +98,7 @@
       "name": "@personal-agent/session-store",
       "version": "0.1.0",
       "dependencies": {
+        "@personal-agent/config": "workspace:*",
         "@personal-agent/shared": "workspace:*",
         "drizzle-orm": "^0.45.2",
       },

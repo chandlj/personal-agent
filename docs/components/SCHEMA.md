@@ -83,7 +83,6 @@ Columns:
 
 - `id` - primary key
 - `workspace_id` - foreign key to `workspaces`
-- `agent_id` - logical agent name such as `main`
 - `session_key` - stable route key such as `agent:main:telegram:dm:12345`
 - `parent_session_id` - nullable self-reference for sessions created from another session
 - `runtime_provider` - runtime owner, such as `pi`
@@ -91,9 +90,6 @@ Columns:
 - `runtime_session_path` - nullable provider/runtime session file path
 - `active_leaf_entry_id` - nullable foreign key to the current `session_entries` leaf
 - `source` - `cli`, `telegram`, etc.
-- `platform` - nullable platform name
-- `chat_id` - nullable chat identifier
-- `thread_id` - nullable thread identifier
 - `title` - optional human label
 - `status` - `active`, `archived`, `closed`
 - `created_at`
@@ -108,7 +104,6 @@ Indexes:
 - index on `parent_session_id`
 - index on `runtime_provider`, `runtime_session_id`
 - index on `source`
-- index on `platform`, `chat_id`
 
 ### `session_entries`
 

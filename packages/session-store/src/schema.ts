@@ -38,7 +38,6 @@ export const sessions = sqliteTable(
     workspaceId: text("workspace_id")
       .notNull()
       .references(() => workspaces.id),
-    agentId: text("agent_id").notNull(),
     sessionKey: text("session_key").notNull(),
     parentSessionId: text("parent_session_id").references((): AnySQLiteColumn => sessions.id),
     runtimeProvider: text("runtime_provider").notNull(),
@@ -47,12 +46,9 @@ export const sessions = sqliteTable(
     activeLeafEntryId: text("active_leaf_entry_id").references(
       (): AnySQLiteColumn => sessionEntries.id
     ),
-    source: text("source").notNull(),
-    platform: text("platform"),
-    chatId: text("chat_id"),
-    threadId: text("thread_id"),
+    source: text("source", { enum: ["cli", "telegram", "scheduler"] }).notNull(),
     title: text("title"),
-    status: text("status").notNull(),
+    status: text("status", { enum: ["active", "archived", "closed"] }).notNull(),
     createdAt: text("created_at").notNull(),
     updatedAt: text("updated_at").notNull(),
     lastMessageAt: text("last_message_at")
@@ -66,8 +62,8 @@ export const sessions = sqliteTable(
     index("sessions_parent_session_id_idx").on(table.parentSessionId),
     index("sessions_runtime_identity_idx").on(table.runtimeProvider, table.runtimeSessionId),
     index("sessions_source_idx").on(table.source),
-    index("sessions_platform_chat_idx").on(table.platform, table.chatId),
     unique("sessions_id_active_leaf_unique").on(table.id, table.activeLeafEntryId),
+    check("sessions_source_check", sql`${table.source} IN ('cli', 'telegram', 'scheduler')`),
     check("sessions_status_check", sql`${table.status} IN ('active', 'archived', 'closed')`),
     foreignKey({
       name: "sessions_active_leaf_same_session_fk",
@@ -86,12 +82,26 @@ export const sessionEntries = sqliteTable(
       .references((): AnySQLiteColumn => sessions.id),
     parentEntryId: text("parent_entry_id").references((): AnySQLiteColumn => sessionEntries.id),
     runtimeEntryId: text("runtime_entry_id"),
-    entryType: text("entry_type").notNull(),
-    role: text("role"),
-    messageType: text("message_type"),
+    entryType: text("entry_type", {
+      enum: [
+        "message",
+        "state_change",
+        "compaction",
+        "branch_summary",
+        "label",
+        "metadata",
+        "custom"
+      ]
+    }).notNull(),
+    role: text("role", { enum: ["system", "user", "assistant", "tool", "custom"] }),
+    messageType: text("message_type", {
+      enum: ["text", "attachment", "tool_call", "tool_result", "status"]
+    }),
     text: text("text"),
-    payloadJson: text("payload_json"),
-    runtimePayloadJson: text("runtime_payload_json"),
+    payloadJson: text("payload_json", { mode: "json" }).$type<Record<string, unknown>>(),
+    runtimePayloadJson: text("runtime_payload_json", { mode: "json" }).$type<
+      Record<string, unknown>
+    >(),
     createdAt: text("created_at").notNull()
   },
   (table) => [
