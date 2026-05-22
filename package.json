@@ -11,7 +11,7 @@
   "scripts": {
     "build": "bun run check",
     "check": "bunx tsc -p tsconfig.json --pretty",
-    "ci": "bunx biome ci .",
+    "ci": "bun run check && bun test && bunx biome ci .",
     "dev:cli": "bun --watch apps/cli/src/index.ts",
     "dev:gateway": "bun --watch apps/gateway/src/index.ts",
     "dev:scheduler": "bun --watch apps/scheduler/src/index.ts",

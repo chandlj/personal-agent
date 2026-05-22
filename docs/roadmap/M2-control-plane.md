@@ -45,9 +45,10 @@ Pi models conversation history as an append-only tree of session entries. M2 sho
 - session entries can be appended with parent-child relationships
 - the active leaf can be moved to support branch/rewind semantics
 - searchable entry text can be queried by session
+- integration coverage exercises workspace resolution, active session routing, entry append, active branch reconstruction, and search through a temporary SQLite database
 
-## Open questions
+## Final decisions
 
-- migration runner packaging
-- SQLite connection lifetime per app
-- exact runtime-neutral entry type names
+- migration runner packaging lives in `openSessionStore()`, which runs the packaged Drizzle migrations before returning a database handle
+- apps should keep one session-store connection open for their process lifetime and call `store.close()` during shutdown
+- runtime-neutral entry types are stored in `session_entries.entry_type`; Pi-specific payloads stay in `runtime_payload_json`

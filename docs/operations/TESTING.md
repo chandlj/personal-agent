@@ -41,10 +41,11 @@ Use sparingly for:
 
 - runtime loads resources correctly
 
-### Before M2 is complete
+### M2 complete
 
 - migrations run cleanly from empty database
-- workspaces, sessions, and transcripts persist correctly
+- workspaces, sessions, and session-entry trees persist correctly
+- session-entry full-text search works from a temporary SQLite database
 
 ### Before M3 and M4 are complete
 
