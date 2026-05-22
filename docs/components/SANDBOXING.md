@@ -45,8 +45,9 @@ You need three layers.
 
 A tool router decides whether a call is:
 
-- `docker`
+- `sandbox`
 - `host`
+- `app`
 - `blocked`
 
 This should happen before any execution.
@@ -79,7 +80,8 @@ Keep the Docker side simple.
 
 Recommendation:
 
-- run one long-lived container per workspace or agent profile
+- run one long-lived container per workspace
+- execute foreground commands inside it with `docker exec`
 - bind-mount only the directories you want the agent to see
 - use a fixed working directory like `/workspace`
 - install tools inside the container, not on the host
@@ -97,7 +99,28 @@ Use at least:
 - restricted env passthrough
 - minimal mounted paths
 
+Block dangerous Docker configuration before container creation:
+
+- privileged containers
+- Docker socket binds
+- binds for `/`, `/etc`, `/proc`, `/sys`, or `/dev`
+- reserved container target overrides such as `/workspace`
+- host networking unless explicitly enabled later
+- unconfined seccomp or AppArmor profiles unless explicitly enabled later
+
 On macOS, remember the container boundary is really Docker Desktop's Linux VM, so host file mounts are the key trust boundary.
+
+## Host execution
+
+Treat host execution as an escape hatch, not as default shell access.
+
+M3 should expose a typed host executor boundary but deny arbitrary commands by default. Purpose-built host tools such as notifications, `open`, and AppleScript can use that boundary later with explicit registration, sanitized environment handling, and M6 approval checks.
+
+For host commands:
+
+- do not accept request-scoped `PATH`
+- block loader and runtime injection variables such as `LD_*` and `DYLD_*`
+- keep command, cwd, target, timestamps, exit code, timeout, and cancellation state in the result metadata
 
 ## Tool design guidance
 

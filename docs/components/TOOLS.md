@@ -22,7 +22,7 @@ Use it to answer:
 
 ```ts
 type ToolExecutionClass = "docker-default" | "host-approved" | "pure-app" | "blocked";
-type ToolExecutionTarget = "docker" | "host" | "app" | "blocked";
+type ToolExecutionTarget = "sandbox" | "host" | "app" | "blocked";
 
 type ToolCallEnvelope = {
   toolName: string;
@@ -67,7 +67,7 @@ Example:
 Expected routing:
 
 - execution class: `docker-default`
-- target: `docker`
+- target: `sandbox`
 - approval: `no`, unless a higher-level destructive pattern policy says otherwise
 
 ### `host-approved`
@@ -137,8 +137,8 @@ Expected result:
 
 | Tool or class | Target | Approval | Notes |
 |---|---|---|---|
-| Filesystem and repo tools | Docker | No | Main path |
-| General bash in Docker | Docker | Pattern-based | Approve destructive patterns if needed |
+| Filesystem and repo tools | Sandbox | No | Main path |
+| General bash in sandbox | Sandbox | Pattern-based | Approve destructive patterns if needed |
 | Notifications | Host | Usually no | Narrow, purpose-built |
 | `open` | Host | Usually yes | Especially for URLs or app launches |
 | AppleScript | Host | Yes | Strong allowlist and audit |
@@ -214,8 +214,10 @@ Every executed tool result should retain:
 - tool name
 - execution class
 - execution target
+- sandbox backend when target is `sandbox`
 - approval id if any
 - start and finish timestamps
+- duration and timeout/cancellation state
 - error state if any
 
 Example audit payload:
