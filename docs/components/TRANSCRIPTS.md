@@ -142,8 +142,7 @@ type SessionEntryRow = {
   "arguments": {
     "command": "ls"
   },
-  "executionClass": "docker-default",
-  "target": "docker"
+  "backend": "docker"
 }
 ```
 
@@ -153,8 +152,7 @@ type SessionEntryRow = {
 {
   "toolName": "bash",
   "success": true,
-  "executionClass": "docker-default",
-  "target": "docker",
+  "backend": "docker",
   "exitCode": 0
 }
 ```
@@ -217,7 +215,7 @@ Each row points to the prior row through `parent_entry_id`. If the user rewinds 
 ## Ownership Boundaries
 
 - gateway adapters normalize inbound and outbound message events
-- runtime and tool router emit tool and status events
+- runtime tool dispatch emits tool and status events
 - approval flows add approval event types in M6
 - scheduler emits delivery/run-related session events in M7
 

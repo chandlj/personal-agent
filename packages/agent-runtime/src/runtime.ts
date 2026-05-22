@@ -1,5 +1,6 @@
 import type { AppConfig } from "@personal-agent/config";
 import { resolveRuntimeResources } from "@personal-agent/config";
+import { createCommandExecutor } from "./execution/factory.js";
 import { PiAgentRuntimeDriver } from "./pi-driver.js";
 import { DefaultResourceLoader } from "./resource-loader.js";
 import type {
@@ -42,6 +43,10 @@ class DefaultAgentRuntime implements AgentRuntime {
     const resources = resolveRuntimeResources(resourceInput);
     const sessionInput: RuntimeSessionFactoryCreateSessionInput = {
       config: this.config,
+      commandExecutor: createCommandExecutor({
+        config: this.config,
+        workspaceRoot
+      }),
       sessionKey: input.sessionKey ?? DEFAULT_SESSION_KEY,
       workspaceRoot,
       resources,

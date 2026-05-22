@@ -68,8 +68,6 @@ Expected core packages:
 Likely but still flexible packages:
 
 - `packages/memory/`
-- `packages/sandbox/`
-- `packages/tool-router/`
 - `packages/shared/`
 
 The purpose of `packages/` is to keep the architecture modular enough to support gateway, local operator entrypoints, and scheduler without duplicating system logic. It is not necessary for every possible package boundary to be fully realized immediately.
@@ -171,7 +169,8 @@ This should remain clearly marked as deferred so that its presence in the reposi
 
 #### `packages/agent-runtime/`
 
-Common execution layer used by the system regardless of how work arrived.
+Common runtime layer used by the system regardless of how work arrived. It owns session creation,
+tool dispatch, command execution backends, and runtime-facing resource loading.
 
 #### `packages/gateway-core/`
 
@@ -203,14 +202,6 @@ Authentication and approval policy logic.
 #### `packages/memory/`
 
 Memory-specific logic and retrieval behavior, if it becomes substantial enough to merit a dedicated package.
-
-#### `packages/sandbox/`
-
-Execution backends and sandbox enforcement, if those concerns need to be isolated concretely.
-
-#### `packages/tool-router/`
-
-Tool classification and routing, if that boundary becomes clearer as implementation proceeds.
 
 #### `packages/shared/`
 

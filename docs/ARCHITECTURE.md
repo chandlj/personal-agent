@@ -28,7 +28,7 @@ The system is not purely request-driven and not purely event-driven. It supports
 The most important architectural distinction is between direct interaction and background execution. The system must support both cleanly without collapsing them into the same mental model.
 
 > [!NOTE]
-> **@joe**: The request-driven section and the distinction section seem unnecessary. The high-level idea is that its an always-on gateway that receives messages and coordinates work to the shared runtime. The runtime has subsystems for memory, tool execution, sandboxing, and more. Various entrypoints (message apps, CLI, TUI) interact with the gateway.
+> **@joe**: The request-driven section and the distinction section seem unnecessary. The high-level idea is that its an always-on gateway that receives messages and coordinates work to the shared runtime. The runtime has subsystems for memory, tool execution, command backends, and more. Various entrypoints (message apps, CLI, TUI) interact with the gateway.
 
 ## High-Level Building Blocks
 

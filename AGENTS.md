@@ -2,7 +2,7 @@
 
 ## Project Structure & Module Organization
 
-This is a Bun-first TypeScript monorepo. Runtime entrypoints live in `apps/`: `apps/cli`, `apps/gateway`, and `apps/scheduler`. Reusable code lives in `packages/`, including runtime orchestration, config, session storage, sandboxing, gateway adapters, and shared utilities. Tests are colocated with source files as `*.test.ts`, for example `packages/agent-runtime/src/runtime.test.ts`. Long-form design and operations notes live in `docs/`; keep architectural updates there rather than in source comments.
+This is a Bun-first TypeScript monorepo. Runtime entrypoints live in `apps/`: `apps/cli`, `apps/gateway`, and `apps/scheduler`. Reusable code lives in `packages/`, including runtime orchestration, config, session storage, command execution, gateway adapters, and shared utilities. Tests are colocated with source files as `*.test.ts`, for example `packages/agent-runtime/src/runtime.test.ts`. Long-form design and operations notes live in `docs/`; keep architectural updates there rather than in source comments.
 
 ## Build, Test, and Development Commands
 

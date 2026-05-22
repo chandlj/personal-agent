@@ -6,7 +6,7 @@ Build a focused TypeScript personal agent harness with:
 
 - `pi-coding-agent` as the core runtime
 - Telegram as the first messaging gateway
-- Docker-default sandboxing with guarded host integrations
+- Docker-default command execution with guarded host integrations
 - configurable memory
 - skills and Markdown resource files
 - scheduled jobs
@@ -53,8 +53,6 @@ Create the repo structure and establish the runtime baseline.
    - `packages/shared`
    - `packages/session-store`
    - `packages/agent-runtime`
-   - `packages/sandbox`
-   - `packages/tool-router`
    - `packages/gateway-core`
    - `packages/gateway-adapter-telegram`
    - `packages/auth`
@@ -182,45 +180,45 @@ Run file and shell tools through Docker by default.
 
 ### Deliverables
 
-- Docker executor
-- host executor
-- shared sandbox types
-- tool routing policy skeleton
+- Docker command backend
+- guarded local command backend
+- runtime-owned command execution types
+- runtime tool dispatch policy skeleton
 
 ### Suggested tasks
 
-1. Implement `docker-executor.ts`
-2. Implement `host-executor.ts`
+1. Implement `execution/docker-executor.ts` inside `agent-runtime`
+2. Implement `execution/local-executor.ts` inside `agent-runtime`
 3. Add command timeout and cancellation handling
 4. Add basic Docker configuration:
    - image
    - workspace mount
    - working dir
-5. Add minimal policy object to classify tool calls
+5. Add runtime tool handlers that use the configured command backend
 
 ### Exit criteria
 
 - a shell command can be executed in Docker
-- a host command can be executed separately
-- the system can distinguish Docker vs host execution
+- local command execution is denied by default unless explicitly enabled
+- the system can audit the selected command backend
 
-## Milestone 4: Tool router
+## Milestone 4: Runtime tool dispatch
 
 ### Goal
 
-Take control of how tools execute.
+Take control of how runtime tools execute without introducing a separate router package.
 
 ### Deliverables
 
-- built-in tools overridden or wrapped
-- routing logic for Docker, host, and pure app tools
+- built-in tools overridden or wrapped inside `agent-runtime`
+- dispatch logic for command-backed, local integration, and pure app tools
 - protected path checks
 - approval hook points
 
 ### Suggested tasks
 
 1. Override `bash`, `read`, `write`, `edit`
-2. Route default filesystem tools to Docker
+2. Send default filesystem tools to the configured command backend
 3. Block protected paths
 4. Add audit metadata to tool results
 5. Add a small host-only tool example
@@ -440,7 +438,7 @@ Every milestone should add at least one integration test.
 
 - runtime
 - persistence
-- Docker sandbox
+- Docker command execution
 - Telegram gateway
 - memory
 

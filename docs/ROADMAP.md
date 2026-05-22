@@ -32,8 +32,8 @@ Ship a usable personal agent with a shared runtime, Telegram gateway, Docker-fir
 - local CLI frontend
 - workspace registry with one stable workspace per main chat
 - SQLite control plane
-- Docker-first sandbox
-- tool routing and approvals
+- Docker-first command execution
+- runtime-owned tool dispatch and approvals
 - Telegram gateway MVP
 - scheduler with fresh sessions
 - Hermes-style local memory plus transcript search
@@ -59,8 +59,7 @@ Ship a usable personal agent with a shared runtime, Telegram gateway, Docker-fir
 - [M0 Repo Bootstrap](./roadmap/M0-repo-bootstrap.md)
 - [M1 Shared Runtime](./roadmap/M1-shared-runtime.md)
 - [M2 Control Plane](./roadmap/M2-control-plane.md)
-- [M3 Sandbox Foundation](./roadmap/M3-sandbox.md)
-- [M4 Tool Router](./roadmap/M4-tool-router.md)
+- [M3 Runtime Execution Backends](./roadmap/M3-sandbox.md)
 - [M5 Telegram Gateway](./roadmap/M5-telegram-gateway.md)
 - [M6 Approvals](./roadmap/M6-approvals.md)
 - [M7 Scheduler](./roadmap/M7-scheduler.md)

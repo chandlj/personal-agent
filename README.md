@@ -28,7 +28,7 @@ bun run dev:gateway
 - `apps/cli` - local operator entrypoint
 - `apps/gateway` - messaging gateway and future control API
 - `apps/scheduler` - scheduled job runner
-- `packages/*` - shared runtime, storage, auth, sandboxing, and adapters
+- `packages/*` - shared runtime, storage, auth, command execution, and adapters
 
 ## Status
 

@@ -18,7 +18,7 @@ The CLI is a first-class frontend alongside:
 - Telegram gateway
 - scheduler
 
-It uses the same shared runtime, tool router, memory system, and control plane.
+It uses the same shared runtime, runtime-owned tool dispatch, memory system, and control plane.
 
 The CLI is also the primary local operator surface in v1.
 
@@ -316,7 +316,6 @@ CLI may start with ad hoc local workspaces in v1, but any persisted CLI session 
 CLI sessions must use the same:
 
 - `packages/agent-runtime`
-- `packages/tool-router`
 - `packages/memory`
 - `packages/session-store`
 
@@ -355,7 +354,7 @@ If the process exited or restarted, the approval remains recorded for audit and 
 ### Example approval flow
 
 1. agent requests `run_applescript(script_id="open-music")`
-2. tool router marks it `host-approved`
+2. runtime policy marks it as requiring approval
 3. CLI shows pending approval
 4. operator runs `personal-agent approvals approve appr_123`
 5. if the current process is still waiting, the tool resumes and the approval record is persisted
