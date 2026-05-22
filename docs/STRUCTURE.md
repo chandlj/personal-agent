@@ -183,7 +183,8 @@ Telegram-specific adapter code kept separate from gateway-core.
 
 #### `packages/session-store/`
 
-Persistence layer for sessions, transcripts, jobs, approvals, workspace state, and related metadata.
+Persistence layer for workspace state, sessions, and session-entry history. Later milestones add
+repositories for approvals, scheduler state, memory metadata, and related audit rows.
 
 #### `packages/scheduler-core/`
 
