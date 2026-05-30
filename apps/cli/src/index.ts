@@ -27,7 +27,7 @@ async function main(): Promise<void> {
     .description("Start an interactive chat session")
     .option("--cwd <path>", "workspace root", process.cwd())
     .option("--session-key <key>", "session key for the runtime session")
-    .option("--tui", "start the interactive session in TUI mode")
+    .option("--tui", "start the interactive session in TUI mode (default)")
     .action(async (options: ChatStartCommandOptions) => {
       await runChatStartCommand(options);
     });

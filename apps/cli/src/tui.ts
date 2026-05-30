@@ -53,12 +53,6 @@ const style = {
 };
 
 export async function runChatStartCommand(options: ChatStartOptions): Promise<void> {
-  if (!options.tui) {
-    console.error("error: chat start currently requires --tui");
-    process.exitCode = 2;
-    return;
-  }
-
   if (!process.stdin.isTTY || !process.stdout.isTTY) {
     console.error("error: TUI mode requires an interactive terminal");
     process.exitCode = 2;
