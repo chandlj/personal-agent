@@ -94,6 +94,7 @@ class PiRuntimeSession implements RuntimeSession {
       }
 
       events.push(normalized.event);
+      _request.onEvent?.(normalized.event);
 
       if (normalized.textDelta !== undefined) {
         textDeltas.push(normalized.textDelta);

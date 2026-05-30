@@ -2,10 +2,17 @@ import { resolve } from "node:path";
 import { createAgentRuntime } from "@personal-agent/agent-runtime";
 import { loadAppConfig } from "@personal-agent/config";
 import { Command } from "commander";
+import { runChatStartCommand } from "./tui.js";
 
 interface PromptCommandOptions {
   cwd?: string;
   json?: boolean;
+}
+
+interface ChatStartCommandOptions {
+  cwd?: string;
+  sessionKey?: string;
+  tui?: boolean;
 }
 
 async function main(): Promise<void> {
@@ -15,6 +22,15 @@ async function main(): Promise<void> {
 
   const chat = program.command("chat").description("Agent chat commands");
   configurePromptCommand(chat.command("run").description("Run a one-shot prompt"));
+  chat
+    .command("start")
+    .description("Start an interactive chat session")
+    .option("--cwd <path>", "workspace root", process.cwd())
+    .option("--session-key <key>", "session key for the runtime session")
+    .option("--tui", "start the interactive session in TUI mode")
+    .action(async (options: ChatStartCommandOptions) => {
+      await runChatStartCommand(options);
+    });
 
   await program.parseAsync(process.argv);
 }

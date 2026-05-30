@@ -99,6 +99,32 @@ describe("AgentRuntime", () => {
     created.dispose();
     expect(session.disposed).toBe(true);
   });
+
+  test("passes prompt event handlers through to runtime sessions", async () => {
+    const root = await mkdtemp(join(tmpdir(), "personal-agent-runtime-"));
+    const session = new FakeRuntimeSession({
+      result: {
+        sessionId: "session-1",
+        text: "done",
+        events: []
+      }
+    });
+    const runtime = createAgentRuntime({
+      config: testConfig({
+        globalRoot: join(root, "global"),
+        workspaceRoot: join(root, "workspace")
+      }),
+      sessionFactory: new FakeRuntimeSessionFactory(session)
+    });
+    const onEvent = () => {};
+
+    await runtime.runPrompt({
+      prompt: "hello",
+      onEvent
+    });
+
+    expect(session.requests[0]?.onEvent).toBe(onEvent);
+  });
 });
 
 class FakeRuntimeSessionFactory implements RuntimeSessionFactory {

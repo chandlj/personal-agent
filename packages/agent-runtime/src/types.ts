@@ -177,6 +177,7 @@ export interface PromptRequest {
   sessionKey?: string;
   workspaceRoot?: string;
   metadata?: Record<string, unknown>;
+  onEvent?: RuntimeEventHandler;
 }
 
 export interface PromptResult {
@@ -185,6 +186,8 @@ export interface PromptResult {
   events: RuntimeEvent[];
   metadata?: Record<string, unknown>;
 }
+
+export type RuntimeEventHandler = (event: RuntimeEvent) => void;
 
 export interface RuntimeSession {
   id: string;
