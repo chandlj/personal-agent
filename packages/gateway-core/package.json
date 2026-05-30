@@ -10,8 +10,11 @@
     "build": "bun run check"
   },
   "dependencies": {
+    "@personal-agent/agent-runtime": "workspace:*",
     "@personal-agent/auth": "workspace:*",
-    "@personal-agent/config": "workspace:*"
+    "@personal-agent/config": "workspace:*",
+    "@personal-agent/session-store": "workspace:*",
+    "@personal-agent/shared": "workspace:*"
   },
   "exports": {
     ".": {
