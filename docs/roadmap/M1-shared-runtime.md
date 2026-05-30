@@ -56,7 +56,7 @@ not part of our public runtime API yet.
 Deferred option groups:
 
 - model/provider/thinking selection, when we add operator controls
-- tool allowlists, when the tool router and sandbox policy are wired in
+- tool allowlists, when runtime tool dispatch and command policy are wired in
 - durable session IDs, once the SQLite control plane owns persistence
 - memory injection, once the memory milestone defines the contract
 - delivery metadata, when Telegram and scheduler frontends are implemented

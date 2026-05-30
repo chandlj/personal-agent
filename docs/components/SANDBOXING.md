@@ -5,8 +5,8 @@
 Use a hybrid model:
 
 - Docker for most execution
-- a guarded host executor for the small set of tools that truly need macOS access
-- policy enforcement in code, not just in prompts
+- guarded local execution for the small set of tools that truly need macOS access
+- policy enforcement inside `agent-runtime`, not just in prompts
 
 This is the right fit for your Mac setup.
 
@@ -39,20 +39,28 @@ Examples:
 
 ## Enforcement model
 
-You need three layers.
+You need three runtime-owned layers.
 
-### 1. Routing layer
+### 1. Tool dispatch layer
 
-A tool router decides whether a call is:
+The runtime decides whether a tool is:
 
-- `sandbox`
-- `host`
-- `app`
-- `blocked`
+- command-backed
+- app-native
+- blocked
 
-This should happen before any execution.
+This should happen before command execution. There is no standalone v1 tool-router package.
 
-### 2. Host policy layer
+### 2. Command backend layer
+
+Command-backed tools use the configured backend:
+
+- `docker`
+- `local`
+
+Docker is the default. Local command execution is disabled unless explicitly enabled.
+
+### 3. Host policy layer
 
 Host tools should require:
 
@@ -62,7 +70,7 @@ Host tools should require:
 - destructive command approval
 - audit logging
 
-### 3. OS-level sandbox for host commands
+### 4. OS-level sandbox for host commands
 
 Wrap host shell execution with `@anthropic-ai/sandbox-runtime` where possible.
 
@@ -110,17 +118,19 @@ Block dangerous Docker configuration before container creation:
 
 On macOS, remember the container boundary is really Docker Desktop's Linux VM, so host file mounts are the key trust boundary.
 
-## Host execution
+## Local execution
 
-Treat host execution as an escape hatch, not as default shell access.
+Treat local execution as an escape hatch, not as default shell access.
 
-M3 should expose a typed host executor boundary but deny arbitrary commands by default. Purpose-built host tools such as notifications, `open`, and AppleScript can use that boundary later with explicit registration, sanitized environment handling, and M6 approval checks.
+M3 should expose a local command backend but deny arbitrary commands by default. Purpose-built
+host tools such as notifications, `open`, and AppleScript can use runtime-owned handlers later
+with explicit registration, sanitized environment handling, and M6 approval checks.
 
-For host commands:
+For local commands:
 
 - do not accept request-scoped `PATH`
 - block loader and runtime injection variables such as `LD_*` and `DYLD_*`
-- keep command, cwd, target, timestamps, exit code, timeout, and cancellation state in the result metadata
+- keep command, cwd, backend, timestamps, exit code, timeout, and cancellation state in the result metadata
 
 ## Tool design guidance
 
@@ -144,7 +154,7 @@ If you must keep host bash, keep it disabled by default and put it behind explic
 |---|---|---|---|
 | file and repo tools | Docker | No | Main working path |
 | general bash | Docker | Optional | Approval for destructive patterns |
-| host integrations | Host | Usually yes | Strong allowlist |
+| host integrations | Local runtime handler | Usually yes | Strong allowlist |
 | memory and DB tools | Host process | No shell | Pure app-layer logic |
 
 ## Practical implementation inside pi
@@ -154,6 +164,7 @@ Use pi extension hooks for:
 - overriding built-in tools
 - blocking unsafe paths
 - confirming destructive actions
-- swapping bash operations to sandboxed host execution
+- swapping bash operations to the configured command backend
 
-The key point is that pi already gives you the interception points. You only need to add your routing and policy logic.
+The key point is that pi already gives you the interception points. Keep dispatch and policy in
+`agent-runtime` unless dynamic routing becomes substantial enough to split out again.

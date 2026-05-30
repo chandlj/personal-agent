@@ -40,9 +40,11 @@ export interface PlatformConfig {
   telegram: TelegramPlatformConfig;
 }
 
-export interface SandboxConfig {
+export interface CommandExecutionConfig {
+  backend: "docker" | "local";
   dockerImage: string;
   dockerWorkspacePath: string;
+  allowLocalCommands: boolean;
 }
 
 export interface SchedulerConfig {
@@ -57,7 +59,7 @@ export interface AppConfig {
   runtime: RuntimeConfig;
   auth: AuthConfig;
   platforms: PlatformConfig;
-  sandbox: SandboxConfig;
+  execution: CommandExecutionConfig;
   scheduler: SchedulerConfig;
   state: StateConfig;
 }

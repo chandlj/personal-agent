@@ -37,9 +37,11 @@ export function loadAppConfig(): AppConfig {
         allowedUsers: []
       }
     },
-    sandbox: {
+    execution: {
+      backend: "docker",
       dockerImage: "oven/bun:1.3.10-debian",
-      dockerWorkspacePath: "/workspace"
+      dockerWorkspacePath: "/workspace",
+      allowLocalCommands: false
     },
     scheduler: {
       tickIntervalMs: 60_000

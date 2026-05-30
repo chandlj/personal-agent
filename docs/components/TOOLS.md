@@ -6,45 +6,47 @@ This doc is the canonical v1 tool and policy matrix.
 
 Use it to answer:
 
-- which tools run in Docker
-- which tools may run on the host
-- which tools require approval
+- which tools use command execution
+- which command backend they use
+- which host integrations require approval
+- which tools are pure app logic
 - which tools are blocked
 
-## Execution classes
+## Execution model
 
-- `docker-default`
-- `host-approved`
-- `pure-app`
-- `blocked`
+The agent runtime owns tool definitions and dispatch. There is no standalone v1 tool router.
 
-## Exact TypeScript interfaces
+Tool handlers fall into three groups:
+
+- command-backed tools: shell and filesystem work executed through the configured backend
+- app-native tools: memory, transcript search, config reads, and approval state transitions
+- blocked tools: unsupported or unsafe host actions rejected before execution
+
+Command execution backends:
 
 ```ts
-type ToolExecutionClass = "docker-default" | "host-approved" | "pure-app" | "blocked";
-type ToolExecutionTarget = "sandbox" | "host" | "app" | "blocked";
+type ExecutionBackend = "docker" | "local";
 
-type ToolCallEnvelope = {
-  toolName: string;
-  arguments: Record<string, unknown>;
-  sessionId: string;
-  workspaceId?: string;
-};
-
-type ToolRoutingDecision = {
-  executionClass: ToolExecutionClass;
-  target: ToolExecutionTarget;
-  requiresApproval: boolean;
-  approvalReason?: string;
-  blockReason?: string;
+type ExecutionRequest = {
+  command: string;
+  cwd?: string;
+  env?: Record<string, string>;
+  timeoutMs?: number;
+  metadata?: {
+    toolName?: string;
+    sessionId?: string;
+    workspaceId?: string;
+    workspaceKey?: string;
+    approvalId?: string;
+  };
 };
 ```
 
 ## v1 rules
 
-### `docker-default`
+### Command-backed tools
 
-These should run in Docker by default:
+These should use Docker by default:
 
 - `bash`
 - `read`
@@ -53,7 +55,7 @@ These should run in Docker by default:
 - `grep`
 - `find`
 - `ls`
-- `git` and build/test commands
+- git and build/test commands
 
 Example:
 
@@ -64,15 +66,15 @@ Example:
 }
 ```
 
-Expected routing:
+Expected behavior:
 
-- execution class: `docker-default`
-- target: `sandbox`
-- approval: `no`, unless a higher-level destructive pattern policy says otherwise
+- runtime invokes the configured command backend
+- backend is `docker` by default
+- approval is not required unless destructive-pattern policy says otherwise
 
-### `host-approved`
+### Local host integrations
 
-These are the allowed host-side integrations in v1:
+These are allowed only as explicit host-side integrations:
 
 - notifications
 - `open`
@@ -95,15 +97,15 @@ Example:
 }
 ```
 
-Expected routing:
+Expected behavior:
 
-- execution class: `host-approved`
-- target: `host`
-- approval: usually `yes`
+- runtime invokes a purpose-built host tool or an explicitly enabled local backend
+- approval is usually required for app launches, URLs, and AppleScript
+- unrestricted local shell remains disabled by default
 
-### `pure-app`
+### App-native tools
 
-These should stay inside the host process without shell execution:
+These stay inside the runtime process without shell execution:
 
 - memory service actions
 - transcript search
@@ -111,7 +113,7 @@ These should stay inside the host process without shell execution:
 - repository lookups
 - approval state transitions
 
-### `blocked`
+### Blocked tools
 
 Block these by default:
 
@@ -135,58 +137,14 @@ Expected result:
 
 ## Approval policy
 
-| Tool or class | Target | Approval | Notes |
+| Tool class | Backend or path | Approval | Notes |
 |---|---|---|---|
-| Filesystem and repo tools | Sandbox | No | Main path |
-| General bash in sandbox | Sandbox | Pattern-based | Approve destructive patterns if needed |
-| Notifications | Host | Usually no | Narrow, purpose-built |
-| `open` | Host | Usually yes | Especially for URLs or app launches |
-| AppleScript | Host | Yes | Strong allowlist and audit |
-| Memory and search actions | Pure app | No | No shell path |
-
-## Example decisions
-
-### Example 1: repo read
-
-Prompt:
-
-```text
-Search the repo for TODO comments.
-```
-
-Expected behavior:
-
-- tool router uses `grep` or equivalent
-- target is Docker
-- no host approval involved
-
-### Example 2: notification
-
-Prompt:
-
-```text
-Send me a notification when this job finishes.
-```
-
-Expected behavior:
-
-- agent uses `notification(title, body)`
-- target is host
-- may run without approval if policy allows
-
-### Example 3: AppleScript
-
-Prompt:
-
-```text
-Open Music and start my focus playlist.
-```
-
-Expected behavior:
-
-- agent uses `run_applescript(...)`
-- approval required
-- execution and result both audited
+| Filesystem and repo tools | Docker command backend | No | Main path |
+| General bash | Docker command backend | Pattern-based | Approve destructive patterns if needed |
+| Notifications | Purpose-built local tool | Usually no | Narrow, registered behavior |
+| `open` | Purpose-built local tool | Usually yes | Especially for URLs or app launches |
+| AppleScript | Purpose-built local tool | Yes | Strong allowlist and audit |
+| Memory and search actions | Runtime process | No | No shell path |
 
 ## Protected path policy
 
@@ -198,35 +156,27 @@ At minimum, protect:
 - `~/.gnupg`
 - the operator home directory outside approved workspace roots
 
-If access to a protected path is ever allowed later, it should go through an explicit host tool with approval.
-
-## Host tool registration rules
-
-- every host tool must be explicitly registered
-- every host tool must declare its approval behavior
-- every host tool must emit audit metadata
-- every host tool must be documented here before shipping
+If access to a protected path is ever allowed later, it should go through an explicit host tool
+with approval.
 
 ## Audit expectations
 
-Every executed tool result should retain:
+Every executed command result should retain:
 
 - tool name
-- execution class
-- execution target
-- sandbox backend when target is `sandbox`
+- execution backend
 - approval id if any
 - start and finish timestamps
 - duration and timeout/cancellation state
+- command and cwd
 - error state if any
 
 Example audit payload:
 
 ```json
 {
-  "toolName": "run_applescript",
-  "executionClass": "host-approved",
-  "target": "host",
+  "toolName": "bash",
+  "backend": "docker",
   "approvalId": "appr_123",
   "startedAt": "2026-04-03T16:10:00Z",
   "finishedAt": "2026-04-03T16:10:02Z",
@@ -236,9 +186,9 @@ Example audit payload:
 
 ## Ownership
 
-- `SANDBOXING.md` explains the execution model
+- `SANDBOXING.md` explains the command execution model
 - this doc explains the concrete v1 policy inventory
-- implementation should keep this matrix in sync with code
+- implementation should keep this matrix in sync with `agent-runtime`
 
 ## Non-goals
 

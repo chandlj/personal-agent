@@ -12,6 +12,7 @@ import {
   SettingsManager
 } from "@earendil-works/pi-coding-agent";
 import { normalizePiEvent } from "./pi-events.js";
+import { createRuntimeCommandTools } from "./pi-tools.js";
 import type {
   LoadedRuntimeResource,
   LoadedRuntimeResourceDirectory,
@@ -48,7 +49,11 @@ export class PiAgentRuntimeDriver implements RuntimeSessionFactory {
       modelRegistry,
       settingsManager,
       sessionManager,
-      resourceLoader
+      resourceLoader,
+      customTools: createRuntimeCommandTools({
+        commandExecutor: input.commandExecutor,
+        cwd: input.workspaceRoot
+      })
     });
 
     return new PiRuntimeSession({

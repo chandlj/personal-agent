@@ -4,6 +4,7 @@ import type {
   RuntimeResourcePaths,
   RuntimeResourceRootKind
 } from "@personal-agent/config";
+import type { CommandExecutor } from "./execution/types.js";
 
 export type RuntimeEvent =
   | RuntimeSessionEvent
@@ -205,6 +206,7 @@ export interface RuntimeResourceLoader {
 
 export interface RuntimeSessionFactoryCreateSessionInput {
   config: AppConfig;
+  commandExecutor: CommandExecutor;
   sessionKey: string;
   workspaceRoot: string;
   resources: ResolvedRuntimeResources;

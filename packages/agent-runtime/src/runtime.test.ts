@@ -55,6 +55,7 @@ describe("AgentRuntime", () => {
       "global",
       "workspace"
     ]);
+    expect(sessionFactory.inputs[0]?.commandExecutor.backend).toBe("docker");
   });
 
   test("disposes one-shot prompt sessions after prompt failures", async () => {
@@ -181,9 +182,11 @@ function testConfig(input: { globalRoot: string; workspaceRoot: string }): AppCo
         allowedUsers: []
       }
     },
-    sandbox: {
+    execution: {
+      backend: "docker",
       dockerImage: "oven/bun:1.3.10-debian",
-      dockerWorkspacePath: "/workspace"
+      dockerWorkspacePath: "/workspace",
+      allowLocalCommands: false
     },
     scheduler: {
       tickIntervalMs: 60_000

@@ -58,10 +58,12 @@ Use this only for operator-owned CLI project workspaces, not for generated Teleg
 - `gateway.telegram.botToken`
 - `gateway.telegram.allowedUsers`
 
-### Sandbox
+### Execution
 
-- `sandbox.docker.image`
-- `sandbox.docker.workspaceRoot`
+- `execution.backend`
+- `execution.dockerImage`
+- `execution.dockerWorkspacePath`
+- `execution.allowLocalCommands`
 
 ## Suggested config shape
 
@@ -79,16 +81,11 @@ Use this only for operator-owned CLI project workspaces, not for generated Teleg
       "homeChatId": "123456789"
     }
   },
-  "sandbox": {
-    "docker": {
-      "image": "personal-agent:base",
-      "workspaceRoot": "~/.personal-agent/workspaces",
-      "defaultWorkdir": "/workspace"
-    },
-    "host": {
-      "enabledTools": ["notification", "open", "applescript"],
-      "requireApprovalByDefault": true
-    }
+  "execution": {
+    "backend": "docker",
+    "dockerImage": "personal-agent:base",
+    "dockerWorkspacePath": "/workspace",
+    "allowLocalCommands": false
   },
   "memory": {
     "memoryCharLimit": 2200,
@@ -126,16 +123,11 @@ type PersonalAgentConfig = {
       homeChatId?: string;
     };
   };
-  sandbox: {
-    docker: {
-      image: string;
-      workspaceRoot: string;
-      defaultWorkdir: string;
-    };
-    host: {
-      enabledTools: Array<"notification" | "open" | "applescript">;
-      requireApprovalByDefault: boolean;
-    };
+  execution: {
+    backend: "docker" | "local";
+    dockerImage: string;
+    dockerWorkspacePath: string;
+    allowLocalCommands: boolean;
   };
   memory: {
     memoryCharLimit: number;
@@ -199,7 +191,7 @@ Should consume typed config only. They should not parse env vars directly.
 
 ```ts
 const config = loadConfig();
-const image = config.sandbox.docker.image;
+const image = config.execution.dockerImage;
 const allowedUsers = config.gateway.telegram.allowedUsers;
 ```
 
@@ -208,7 +200,7 @@ const allowedUsers = config.gateway.telegram.allowedUsers;
 - all paths should be normalized before use
 - unknown config keys should be rejected in strict mode
 - secrets should not be stored in workspace-local config
-- workspace-local config must not override operator auth or sandbox allowlists
+- workspace-local config must not override operator auth or execution policy
 - workspace-local config must only be loaded for operator-owned CLI project roots
 - generated chat workspaces must not be treated as config override roots
 - default values should be explicit in code and documented here

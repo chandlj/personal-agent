@@ -70,7 +70,7 @@ Keep logs structured enough to answer:
 
 - which session handled a message
 - which workspace was used
-- which tool target executed a call
+- which command backend executed a call
 - whether approval was required
 - whether a scheduled run delivered successfully
 

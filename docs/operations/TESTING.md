@@ -47,11 +47,11 @@ Use sparingly for:
 - workspaces, sessions, and session-entry trees persist correctly
 - session-entry full-text search works from a temporary SQLite database
 
-### Before M3 and M4 are complete
+### Before M3 is complete
 
 - Docker execution works
 - protected paths are blocked
-- host tool routing respects policy
+- local host execution respects policy
 
 ### Before M5 is complete
 

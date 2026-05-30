@@ -11,7 +11,7 @@ Host integrations are in scope for v1, so the safety boundary has to be real bef
 ## Dependencies
 
 - [M2 Control Plane](./M2-control-plane.md)
-- [M4 Tool Router](./M4-tool-router.md)
+- [M3 Runtime Execution Backends](./M3-sandbox.md)
 - [M5 Telegram Gateway](./M5-telegram-gateway.md)
 
 ## Scope

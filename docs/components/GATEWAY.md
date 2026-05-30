@@ -398,7 +398,7 @@ Expected flow:
 1. adapter downloads the file into the workspace
 2. gateway emits a normalized attachment reference
 3. session runtime receives the prompt and file reference
-4. tool router handles any subsequent reads inside Docker
+4. runtime tool dispatch handles any subsequent reads through the configured command backend
 
 ### Example Telegram approval UX
 
@@ -542,7 +542,7 @@ Treat Tailscale as a control-plane exposure feature, not as a substitute for:
 
 - gateway auth
 - host-tool approvals
-- sandbox boundaries
+- command execution boundaries
 - messaging platform allowlists
 
 ## Suggested file layout
